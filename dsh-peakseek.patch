@@ -1,0 +1,1423 @@
+diff --git a/packages/bundle/web-app/cordis.patch.yml b/packages/bundle/web-app/cordis.patch.yml
+index b06e63b54f..1f2e04a8f8 100644
+--- a/packages/bundle/web-app/cordis.patch.yml
++++ b/packages/bundle/web-app/cordis.patch.yml
+@@ -253,6 +253,10 @@
+     - id: ui-permission
+       name: '@deepseek-ai/dsh-client-ui-permission-presets'
+ 
++    # Centered composer hint with the official DeepSeek idle/peak price card.
++    - id: ui-peak-pricing
++      name: '@deepseek-ai/dsh-client-ui-peak-pricing'
++
+     # The agent-preset row in General settings: the default preset for
+     # sessions created later. Absent a roster it renders nothing.
+     - id: ui-agent-preset
+diff --git a/packages/bundle/web-app/package.json b/packages/bundle/web-app/package.json
+index ad9ec48fae..c53218b20f 100644
+--- a/packages/bundle/web-app/package.json
++++ b/packages/bundle/web-app/package.json
+@@ -66,6 +66,7 @@
+     "@deepseek-ai/dsh-client-ui-settings-models": "workspace:^",
+     "@deepseek-ai/dsh-client-ui-settings-plugin-inventory": "workspace:^",
+     "@deepseek-ai/dsh-client-ui-permission-presets": "workspace:^",
++    "@deepseek-ai/dsh-client-ui-peak-pricing": "workspace:^",
+     "@deepseek-ai/dsh-client-ui-plan": "workspace:^",
+     "@deepseek-ai/dsh-client-ui-settings-plugins": "workspace:^",
+     "@deepseek-ai/dsh-client-ui-user-questions": "workspace:^",
+diff --git a/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx b/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx
+index 000174f513..5fc2a4161f 100644
+--- a/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx
++++ b/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx
+@@ -746,7 +746,7 @@ export function InputBar({
+           </div>
+         </div>
+         <div className={css.row}>
+-          <div className={css.tools}>
++          <div className={css.tools} data-composer-tools>
+             <Tooltip label={t('input.commands')} side="top" delayMs={500}>
+               <button
+                 type="button"
+@@ -767,7 +767,7 @@ export function InputBar({
+             </div>
+             {leftItems}
+           </div>
+-          <div className={css.trailing}>
++          <div className={css.trailing} data-composer-trailing>
+             {rightItems}
+             {renderSlot('conversation.input.model', { locked: modelSeatLocked })}
+             <ContextMeter useProjection={useProjection} t={t} />
+diff --git a/packages/client/ui-peak-pricing/README.i18n.yaml b/packages/client/ui-peak-pricing/README.i18n.yaml
+new file mode 100644
+index 0000000000..143a8aad34
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/README.i18n.yaml
+@@ -0,0 +1,6 @@
++# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
++# side as of the last confirmed-consistent state. Both languages carry equal authority;
++# after editing either side, bring the other along and re-record with:
++#   pnpm run verify-translation-pairing --write packages/client/ui-peak-pricing/README.md
++README.md: afa95d52284bbfead010947e26a2caddad80502a
++README.zh.md: 085c36720e22e2903dfd091fd3fca4046343faca
+diff --git a/packages/client/ui-peak-pricing/README.md b/packages/client/ui-peak-pricing/README.md
+new file mode 100644
+index 0000000000..afa95d5228
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/README.md
+@@ -0,0 +1,20 @@
++# @deepseek-ai/dsh-client-ui-peak-pricing
++
++English | [中文](README.zh.md)
++
++Composer hint plugin for the Web UI. It occupies `conversation.input.right`, which is rendered in the visual gap between the permission control and model selector. The hint reads `现在是梁文峰时间` during Beijing peak hours and `现在是梁文谷时间` during idle hours; clicking it toggles a compact price card centered above the hint, and clicking elsewhere closes it.
++
++The Host fetches the [official DeepSeek pricing page](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/), parses the model/version and idle/peak RMB prices, and serves a same-origin cached JSON response. The browser never performs a cross-origin request, so the feature does not depend on third-party CORS headers.
++
++## Model Experience
++
++The hint is presentation-only and adds no prompt text, session event, tool, or model-visible state. It only helps users understand the current official DeepSeek token pricing before sending a request.
++
++#### KV Cache effect
++
++The card distinguishes cache-hit input, cache-miss input, and output prices. It does not change cache behavior or request routing.
++
++## Known Limitations and Deferred Work
++
++- Prices are refreshed by the Host route every 15 minutes and the official source may change its table layout; parsing failures are shown as an actionable link to the source page.
++- The current idle/peak label uses Beijing time, matching the official pricing schedule. Idle prices are validated as exactly half of peak prices.
+diff --git a/packages/client/ui-peak-pricing/README.zh.md b/packages/client/ui-peak-pricing/README.zh.md
+new file mode 100644
+index 0000000000..085c36720e
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/README.zh.md
+@@ -0,0 +1,20 @@
++# @deepseek-ai/dsh-client-ui-peak-pricing
++
++[English](README.md) | 中文
++
++Web UI 的输入框提示插件。它占用 `conversation.input.right`，显示在权限控件与模型选择器之间的视觉空白区域。北京时间高峰时段显示 `现在是梁文峰时间`，空闲时段显示 `现在是梁文谷时间`；点击提示文字可以切换上方居中的模型价格卡片，点击其他区域会关闭卡片。
++
++Host 会读取 [DeepSeek 官方定价页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)，解析模型版本以及空闲／高峰时段的人民币价格，再通过同源接口提供带缓存的 JSON。浏览器不直接跨域请求，因此不依赖第三方 CORS 响应头。
++
++## 模型体验
++
++该提示只负责展示，不会增加 prompt、会话事件、工具或模型可见状态；它用于帮助用户在发送请求前了解 DeepSeek 官方 token 价格。
++
++#### KV Cache 影响
++
++价格卡片分别展示缓存命中输入、缓存未命中输入和输出价格，不会改变缓存行为或请求路由。
++
++## 已知局限与延后工作
++
++- Host 接口每 15 分钟刷新一次价格；如果官方页面调整表格结构，卡片会显示可点击的官方页面链接。
++- 当前时段标签使用北京时间，与官方定价页的时段说明一致；空闲价格会校验为高峰价格的一半。
+diff --git a/packages/client/ui-peak-pricing/package.json b/packages/client/ui-peak-pricing/package.json
+new file mode 100644
+index 0000000000..3e3ed30c50
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/package.json
+@@ -0,0 +1,69 @@
++{
++  "name": "@deepseek-ai/dsh-client-ui-peak-pricing",
++  "description": "Composer time hint with live DeepSeek official model pricing",
++  "version": "0.1.0-rc.7",
++  "publishConfig": {
++    "access": "public"
++  },
++  "repository": {
++    "type": "git",
++    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
++    "directory": "packages/client/ui-peak-pricing"
++  },
++  "type": "module",
++  "main": "lib/index.js",
++  "types": "lib/types/index.d.ts",
++  "exports": {
++    ".": {
++      "types": "./lib/types/index.d.ts",
++      "default": "./lib/index.js"
++    },
++    "./invariant": {
++      "types": "./lib/types/invariant.d.ts",
++      "default": "./lib/invariant.js"
++    },
++    "./client": {
++      "types": "./lib/types/client/index.d.ts",
++      "default": "./lib/client.js"
++    },
++    "./src/*": "./src/*",
++    "./package.json": "./package.json"
++  },
++  "dsh": {
++    "client": {
++      "inject": [
++        "@deepseek-ai/dsh-client-ui-conversation"
++      ],
++      "platform": "web"
++    }
++  },
++  "scripts": {
++    "bundle": "tsdown",
++    "watch": "tsdown --watch"
++  },
++  "license": "MIT",
++  "peerDependencies": {
++    "@deepseek-ai/cordis": "workspace:^",
++    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
++    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
++    "@deepseek-ai/dsh-host-webserver": "workspace:^",
++    "@deepseek-ai/dsh-invariants": "workspace:^",
++    "react": "^18.2.0"
++  },
++  "devDependencies": {
++    "@deepseek-ai/cordis": "workspace:^",
++    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
++    "@deepseek-ai/dsh-client-ui-primitives": "workspace:^",
++    "@deepseek-ai/dsh-host-webserver": "workspace:^",
++    "@deepseek-ai/dsh-invariants": "workspace:^",
++    "@types/react": "~18.3.1",
++    "react": "^18.2.0",
++    "react-dom": "^18.2.0"
++  },
++  "files": [
++    "lib/index.js",
++    "lib/invariant.js",
++    "lib/client.js",
++    "lib/types/**/*.d.ts"
++  ]
++}
+diff --git a/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.module.css b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.module.css
+new file mode 100644
+index 0000000000..ba47c8d430
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.module.css
+@@ -0,0 +1,133 @@
++.root {
++  position: absolute;
++  transform: translateX(-50%);
++  bottom: 8px;
++  display: flex;
++  z-index: 1;
++  pointer-events: none;
++}
++
++.root > span {
++  pointer-events: auto;
++}
++
++.anchor {
++  display: inline-flex;
++  align-items: center;
++  gap: 6px;
++  max-width: min(260px, calc(100vw - 80px));
++  height: 28px;
++  padding: 0 9px;
++  overflow: hidden;
++  border: none;
++  border-radius: 8px;
++  background: transparent;
++  color: var(--dsw-alias-label-secondary);
++  font-size: 13px;
++  font-weight: 500;
++  line-height: 20px;
++  white-space: nowrap;
++  text-overflow: ellipsis;
++  cursor: pointer;
++}
++
++.anchor:hover {
++  background: var(--dsw-alias-interactive-bg-hover);
++  color: var(--dsw-alias-label-primary);
++}
++
++.anchor:focus-visible {
++  outline: 2px solid var(--dsw-alias-state-business-primary);
++  outline-offset: 1px;
++}
++
++.dot {
++  flex: none;
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: var(--dsw-alias-state-business-primary);
++  box-shadow: 0 0 0 3px var(--dsw-alias-interactive-bg-active);
++}
++
++.panel {
++  color: var(--dsw-alias-label-primary);
++  font-size: 12px;
++  line-height: 18px;
++}
++
++.title {
++  color: var(--dsw-alias-label-primary);
++  font-size: 14px;
++  font-weight: 600;
++  line-height: 20px;
++}
++
++.period {
++  margin-top: 2px;
++  color: var(--dsw-alias-label-tertiary);
++}
++
++.model {
++  margin-top: 10px;
++  padding-top: 8px;
++  border-top: 1px solid var(--dsw-alias-border-l2);
++}
++
++.modelName {
++  color: var(--dsw-alias-label-primary);
++  font-weight: 600;
++  white-space: nowrap;
++}
++
++.priceGrid {
++  display: grid;
++  grid-template-columns: minmax(0, 1fr) auto;
++  gap: 2px 8px;
++  margin-top: 3px;
++  color: var(--dsw-alias-label-tertiary);
++}
++
++.priceGrid strong {
++  color: var(--dsw-alias-label-primary);
++  font-weight: 500;
++  white-space: nowrap;
++}
++
++.legend {
++  margin-top: 9px;
++  color: var(--dsw-alias-label-caption);
++}
++
++.source,
++.statusError a {
++  display: inline-block;
++  margin-top: 7px;
++  color: var(--dsw-alias-state-business-primary);
++  text-decoration: none;
++}
++
++.source:hover,
++.statusError a:hover {
++  text-decoration: underline;
++}
++
++.status {
++  color: var(--dsw-alias-label-secondary);
++}
++
++.statusError {
++  color: var(--dsw-alias-label-primary);
++}
++
++.errorDetail {
++  margin-top: 4px;
++  color: var(--dsw-alias-label-tertiary);
++  overflow-wrap: anywhere;
++}
++
++@media (max-width: 640px) {
++  .anchor {
++    max-width: 180px;
++  }
++}
+diff --git a/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.tsx b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.tsx
+new file mode 100644
+index 0000000000..944db7d848
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.tsx
+@@ -0,0 +1,139 @@
++import { useEffect, useLayoutEffect, useRef, useState } from 'react'
++import { HoverCard } from '@deepseek-ai/dsh-client-ui-primitives'
++import { pricePeriodAt } from '../pricing.ts'
++import type { ModelPricing, PricePeriod, PricingSnapshot } from '../pricing.ts'
++import type { PeakPricingProps } from './contract.ts'
++import css from './PeakPricingNotice.module.css'
++
++const PERIOD_LABEL: Record<PricePeriod, string> = { idle: '空闲时段', peak: '高峰时段' }
++const PERIOD_NOTICE: Record<PricePeriod, string> = { idle: '现在是梁文谷时间', peak: '现在是梁文峰时间' }
++
++function useCurrentPeriod(): PricePeriod {
++  const [period, setPeriod] = useState<PricePeriod>(() => pricePeriodAt(new Date()))
++
++  useEffect(() => {
++    const update = () => setPeriod(pricePeriodAt(new Date()))
++    const timer = window.setInterval(update, 30_000)
++    return () => window.clearInterval(timer)
++  }, [])
++
++  return period
++}
++
++function price(value: number): string {
++  return `¥${String(value)}`
++}
++
++function modelPanel(model: ModelPricing): React.ReactNode {
++  return (
++    <section className={css.model} key={model.id}>
++      <div className={css.modelName}>{model.version}</div>
++      <div className={css.priceGrid}>
++        <span>输入 · 缓存命中</span>
++        <strong>{price(model.inputCacheHit.idle)} / {price(model.inputCacheHit.peak)}</strong>
++        <span>输入 · 缓存未命中</span>
++        <strong>{price(model.inputCacheMiss.idle)} / {price(model.inputCacheMiss.peak)}</strong>
++        <span>输出</span>
++        <strong>{price(model.output.idle)} / {price(model.output.peak)}</strong>
++      </div>
++    </section>
++  )
++}
++
++function PricingPanel({ state, currentPeriod }: { state: { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; snapshot: PricingSnapshot }; currentPeriod: PricePeriod }): React.ReactNode {
++  if (state.status === 'loading') return <div className={css.status}>正在读取官方价格…</div>
++  if (state.status === 'error') {
++    return (
++      <div className={css.statusError} role="alert">
++        <div>价格暂时无法读取</div>
++        <div className={css.errorDetail}>{state.message}</div>
++        <a href="https://api-docs.deepseek.com/zh-cn/quick_start/pricing/" target="_blank" rel="noreferrer">打开官方定价页</a>
++      </div>
++    )
++  }
++  return (
++    <div className={css.panel}>
++      <div className={css.title}>DeepSeek 今日模型价格</div>
++      <div className={css.period}>当前：{PERIOD_LABEL[currentPeriod]} · 元 / 百万 tokens</div>
++      {state.snapshot.models.map(modelPanel)}
++      <div className={css.legend}>每行：空闲 / 高峰</div>
++      <a className={css.source} href={state.snapshot.source} target="_blank" rel="noreferrer">查看官方定价页 ↗</a>
++    </div>
++  )
++}
++
++/**
++ * Centered composer hint. The entry is absolute inside the existing composer
++ * card, so it occupies the visual gap between permission and model controls
++ * without changing the input row's measured width.
++ * @param props - slot owner/runtime share and the Host pricing callback.
++ * @returns the hover target and its floating pricing card.
++ */
++export function PeakPricingNotice({ getPricing }: PeakPricingProps): React.ReactNode {
++  const rootRef = useRef<HTMLDivElement>(null)
++  const [state, setState] = useState<{ status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; snapshot: PricingSnapshot }>({ status: 'loading' })
++  const [centerOffset, setCenterOffset] = useState<number | null>(null)
++  const currentPeriod = useCurrentPeriod()
++
++  useLayoutEffect(() => {
++    const root = rootRef.current
++    if (root === null) return
++    const card = root.closest<HTMLElement>('[data-composer-card]')
++    if (card === null) return
++    const tools = card.querySelector<HTMLElement>('[data-composer-tools]')
++    const trailing = card.querySelector<HTMLElement>('[data-composer-trailing]')
++    if (tools === null || trailing === null) return
++
++    const updatePosition = () => {
++      const cardRect = card.getBoundingClientRect()
++      const toolsRect = tools.getBoundingClientRect()
++      const trailingRect = trailing.getBoundingClientRect()
++      const gap = trailingRect.left - toolsRect.right
++      const center = gap >= 0
++        ? (toolsRect.right + trailingRect.left) / 2 - cardRect.left
++        : cardRect.width / 2
++      setCenterOffset(previous => previous !== null && Math.abs(previous - center) < 0.5 ? previous : center)
++    }
++
++    updatePosition()
++    window.addEventListener('resize', updatePosition)
++    if (typeof ResizeObserver === 'undefined') {
++      return () => window.removeEventListener('resize', updatePosition)
++    }
++    const observer = new ResizeObserver(updatePosition)
++    observer.observe(card)
++    observer.observe(tools)
++    observer.observe(trailing)
++    return () => {
++      observer.disconnect()
++      window.removeEventListener('resize', updatePosition)
++    }
++  }, [])
++
++  useEffect(() => {
++    let alive = true
++    void getPricing().then((snapshot) => {
++      if (alive) setState({ status: 'ready', snapshot })
++    }, (error: unknown) => {
++      if (alive) setState({ status: 'error', message: error instanceof Error ? error.message : String(error) })
++    })
++    return () => { alive = false }
++  }, [getPricing])
++
++  return (
++    <div ref={rootRef} className={css.root} style={{ left: centerOffset ?? '50%' }}>
++      <HoverCard
++        trigger="click"
++        placement="top"
++        anchor={(
++          <button type="button" className={css.anchor} title="点击查看或关闭今日模型价格">
++            <span className={css.dot} aria-hidden="true" />
++            <span>{PERIOD_NOTICE[currentPeriod]}</span>
++          </button>
++        )}
++        content={<PricingPanel state={state} currentPeriod={currentPeriod} />}
++        openDelayMs={350}
++      />
++    </div>
++  )
++}
+diff --git a/packages/client/ui-peak-pricing/src/client/contract.ts b/packages/client/ui-peak-pricing/src/client/contract.ts
+new file mode 100644
+index 0000000000..389b88306c
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/client/contract.ts
+@@ -0,0 +1,11 @@
++import type { PropsRuntime, InjectFace } from '@deepseek-ai/dsh-client-ui-slots'
++import type { PricingSnapshot } from '../pricing.ts'
++
++/** Browser callback supplied by the plugin apply function. */
++export interface PeakPricingInjected {
++  /** Read the Host-cached official price snapshot. */
++  readonly getPricing: () => Promise<PricingSnapshot>
++}
++
++/** Full props of the composer pricing notice entry. */
++export type PeakPricingProps = PropsRuntime<'conversation.input.right'> & InjectFace<PeakPricingInjected>
+diff --git a/packages/client/ui-peak-pricing/src/client/index.ts b/packages/client/ui-peak-pricing/src/client/index.ts
+new file mode 100644
+index 0000000000..547db1557a
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/client/index.ts
+@@ -0,0 +1,55 @@
++/** Browser half of the composer time hint and official price hover card. */
++
++import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
++// Type-only: pulls the conversation input-right SlotMap declaration.
++import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
++import { PeakPricingNotice } from './PeakPricingNotice.tsx'
++import type { PeakPricingInjected } from './contract.ts'
++import type { PricingSnapshot } from '../pricing.ts'
++
++/** Services required by the browser-side slot contribution. */
++export const inject = ['slots']
++
++const PRICING_PATH = '/plugins/deepseek-pricing/data'
++
++function isPricingSnapshot(value: unknown): value is PricingSnapshot {
++  if (typeof value !== 'object' || value === null) return false
++  const snapshot = value as Partial<PricingSnapshot>
++  return typeof snapshot.source === 'string'
++    && typeof snapshot.fetchedAt === 'string'
++    && typeof snapshot.date === 'string'
++    && snapshot.timezone === 'Asia/Shanghai'
++    && (snapshot.currentPeriod === 'idle' || snapshot.currentPeriod === 'peak')
++    && Array.isArray(snapshot.models)
++}
++
++async function readPricing(): Promise<PricingSnapshot> {
++  const response = await fetch(PRICING_PATH, { headers: { accept: 'application/json' } })
++  const payload: unknown = await response.json()
++  if (!response.ok) {
++    const message = typeof payload === 'object' && payload !== null && 'error' in payload
++      ? String(payload.error)
++      : `pricing route returned HTTP ${String(response.status)}`
++    throw new Error(message)
++  }
++  if (!isPricingSnapshot(payload)) throw new Error('pricing route returned an invalid snapshot')
++  return payload
++}
++
++/**
++ * Mount one shared pricing request and register the centered right-side input
++ * entry. All session entries reuse this root-scoped request promise.
++ * @param ctx - browser Cordis context.
++ */
++export function apply(ctx: ClientContext): void {
++  let request: Promise<PricingSnapshot> | undefined
++  const getPricing = (): Promise<PricingSnapshot> => request ??= readPricing()
++  const injected = (): PeakPricingInjected => ({ getPricing })
++
++  ctx.slots.inject('conversation.input.right', () => ctx.slots.register({
++    name: 'conversation.input.right',
++    id: 'deepseek-pricing',
++    order: 10,
++    inject: injected,
++  }, PeakPricingNotice))
++}
+diff --git a/packages/client/ui-peak-pricing/src/css-modules.d.ts b/packages/client/ui-peak-pricing/src/css-modules.d.ts
+new file mode 100644
+index 0000000000..8811db1264
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/css-modules.d.ts
+@@ -0,0 +1,4 @@
++declare module '*.module.css' {
++  const classes: Record<string, string>
++  export default classes
++}
+diff --git a/packages/client/ui-peak-pricing/src/index.ts b/packages/client/ui-peak-pricing/src/index.ts
+new file mode 100644
+index 0000000000..9dc33fb233
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/index.ts
+@@ -0,0 +1,70 @@
++/** Host half of the composer pricing hint. */
++
++import type { Context } from '@deepseek-ai/cordis'
++// Type-only import activates the webServer Context merge used by the route.
++import type {} from '@deepseek-ai/dsh-host-webserver'
++import { createPricingSnapshot, parsePricingHtml, PRICING_SOURCE, type PricingSnapshot } from './pricing.ts'
++
++/** Stable Cordis plugin name. */
++export const name = 'client-ui-peak-pricing'
++/** The Host route is available only after the shared web server is ready. */
++export const inject = ['webServer']
++
++const PRICING_PATH = '/plugins/deepseek-pricing/data'
++const CACHE_TTL_MS = 15 * 60 * 1000
++
++function errorMessage(error: unknown): string {
++  return error instanceof Error ? error.message : String(error)
++}
++
++/**
++ * Fetch the official pricing page and expose a same-origin JSON response to the
++ * browser plugin. The response is cached for 15 minutes, while the current
++ * Beijing idle/peak label is recalculated on each request.
++ * @param ctx - Host context carrying the web server.
++ */
++export function apply(ctx: Context): void {
++  let cached: { snapshot: PricingSnapshot; expiresAt: number } | undefined
++  let inFlight: Promise<PricingSnapshot> | undefined
++
++  const load = async (): Promise<PricingSnapshot> => {
++    const now = Date.now()
++    if (cached !== undefined && cached.expiresAt > now) {
++      return createPricingSnapshot(cached.snapshot.models, new Date(cached.snapshot.fetchedAt), new Date())
++    }
++    if (inFlight !== undefined) return inFlight
++    inFlight = (async () => {
++      const response = await fetch(PRICING_SOURCE, { headers: { accept: 'text/html' } })
++      if (!response.ok) throw new Error(`official pricing page returned HTTP ${String(response.status)}`)
++      const models = parsePricingHtml(await response.text())
++      const fetchedAt = new Date()
++      const snapshot = createPricingSnapshot(models, fetchedAt, fetchedAt)
++      cached = { snapshot, expiresAt: Date.now() + CACHE_TTL_MS }
++      return snapshot
++    })().finally(() => { inFlight = undefined })
++    return inFlight
++  }
++
++  ctx.effect(() => ctx.webServer.register({
++    kind: 'exact',
++    path: PRICING_PATH,
++    handler: async (req, res) => {
++      if (req.method !== 'GET' && req.method !== 'HEAD') {
++        res.writeHead(405, { allow: 'GET, HEAD' })
++        res.end()
++        return
++      }
++      try {
++        const body = JSON.stringify(await load())
++        res.writeHead(200, {
++          'cache-control': 'public, max-age=300',
++          'content-type': 'application/json; charset=utf-8',
++        })
++        res.end(req.method === 'HEAD' ? undefined : body)
++      } catch (error) {
++        res.writeHead(502, { 'content-type': 'application/json; charset=utf-8' })
++        res.end(JSON.stringify({ error: errorMessage(error) }))
++      }
++    },
++  }), 'client-ui-peak-pricing: official pricing route')
++}
+diff --git a/packages/client/ui-peak-pricing/src/invariant.ts b/packages/client/ui-peak-pricing/src/invariant.ts
+new file mode 100644
+index 0000000000..eb0c5e5317
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/invariant.ts
+@@ -0,0 +1,24 @@
++/** Package-owned invariant companion for the composer pricing hint plugin. */
++
++/* jscpd:ignore-start */
++import type { Context } from '@deepseek-ai/cordis'
++import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
++
++const PACKAGE_NAME = '@deepseek-ai/dsh-client-ui-peak-pricing'
++
++/** Cordis companion plugin name. */
++export const name = 'client-ui-peak-pricing-invariant'
++/** Service required before the companion can reserve package ownership. */
++export const inject = ['invariants']
++
++/** The feature's observable behavior is covered by its parser and UI checks. */
++const install: InvariantInstaller = () => {}
++
++/**
++ * Register this package's invariant companion.
++ * @param ctx - Cordis context carrying the invariant service.
++ * @returns the installed registration's disposer after setup succeeds.
++ */
++export const apply = (ctx: Context): Promise<() => void> =>
++  Promise.resolve(ctx.invariants.register(PACKAGE_NAME, install))
++/* jscpd:ignore-end */
+diff --git a/packages/client/ui-peak-pricing/src/pricing.ts b/packages/client/ui-peak-pricing/src/pricing.ts
+new file mode 100644
+index 0000000000..33adf9e927
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/src/pricing.ts
+@@ -0,0 +1,186 @@
++/** Runtime parser and wire vocabulary for the official DeepSeek pricing page. */
++
++/** Official source used by the Host fetcher. */
++export const PRICING_SOURCE = 'https://api-docs.deepseek.com/zh-cn/quick_start/pricing/'
++
++/** Price schedule used by the official page. */
++export type PricePeriod = 'idle' | 'peak'
++
++/** One model's per-million-token prices in RMB. */
++export interface ModelPricing {
++  readonly id: string
++  readonly version: string
++  readonly inputCacheHit: Readonly<Record<PricePeriod, number>>
++  readonly inputCacheMiss: Readonly<Record<PricePeriod, number>>
++  readonly output: Readonly<Record<PricePeriod, number>>
++}
++
++/** JSON response sent by the Host pricing route. */
++export interface PricingSnapshot {
++  readonly source: string
++  readonly fetchedAt: string
++  readonly date: string
++  readonly timezone: 'Asia/Shanghai'
++  readonly currentPeriod: PricePeriod
++  readonly models: readonly ModelPricing[]
++}
++
++interface PricingRow {
++  readonly cells: readonly string[]
++}
++
++function htmlText(source: string): string {
++  return source
++    .replace(/<br\s*\/?>/gi, ' ')
++    .replace(/<[^>]+>/g, ' ')
++    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
++    .replace(/&#([0-9]+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 10)))
++    .replace(/&nbsp;/gi, ' ')
++    .replace(/&amp;/gi, '&')
++    .replace(/&lt;/gi, '<')
++    .replace(/&gt;/gi, '>')
++    .replace(/\s+/g, ' ')
++    .trim()
++}
++
++function rowsOf(html: string): readonly PricingRow[] {
++  return [...html.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map(match => ({
++    cells: [...(match[1] ?? '').matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map(cell => htmlText(cell[1] ?? '')),
++  }))
++}
++
++function numericPrice(value: string): number | undefined {
++  const match = value.replaceAll(',', '').match(/\d+(?:\.\d+)?/)
++  if (match === null) return undefined
++  const number = Number(match[0])
++  return Number.isFinite(number) ? number : undefined
++}
++
++function requiredPrice(
++  prices: ReadonlyMap<string, ReadonlyMap<PricePeriod, readonly number[]>>,
++  section: string,
++  period: PricePeriod,
++  modelIndex: number,
++): number {
++  const value = prices.get(section)?.get(period)?.[modelIndex]
++  if (value === undefined) {
++    throw new Error(`DeepSeek pricing page is missing ${section}/${period} price for model index ${String(modelIndex)}`)
++  }
++  return value
++}
++
++function halfPeakPrice(
++  prices: ReadonlyMap<string, ReadonlyMap<PricePeriod, readonly number[]>>,
++  section: string,
++  modelIndex: number,
++): { idle: number; peak: number } {
++  const idle = requiredPrice(prices, section, 'idle', modelIndex)
++  const peak = requiredPrice(prices, section, 'peak', modelIndex)
++  const expectedIdle = peak / 2
++  if (Math.abs(idle - expectedIdle) > Number.EPSILON * Math.max(1, Math.abs(expectedIdle))) {
++    throw new Error(`DeepSeek pricing page must keep ${section} idle price at half of peak price for model index ${String(modelIndex)}`)
++  }
++  return { idle, peak }
++}
++
++function requiredRow(rows: readonly PricingRow[], predicate: (row: PricingRow) => boolean, description: string): PricingRow {
++  const row = rows.find(predicate)
++  if (row === undefined) throw new Error(`DeepSeek pricing page is missing ${description}`)
++  return row
++}
++
++/**
++ * Parse the current official pricing table without depending on a DOM library.
++ * The parser keys prices by the table's labels and keeps the model/version order
++ * declared by the page, so an added model column does not reorder existing data.
++ * @param html - HTML returned by the official pricing URL.
++ * @returns the model price rows from the page.
++ */
++export function parsePricingHtml(html: string): readonly ModelPricing[] {
++  const rows = rowsOf(html)
++  const modelRow = requiredRow(rows, row => row.cells[0] === '模型' && row.cells.length >= 2, 'model row')
++  const modelIds = modelRow.cells.slice(1)
++  const versionRow = requiredRow(rows, row => row.cells[0] === '模型版本', 'model version row')
++  const sections = new Map<string, Map<PricePeriod, readonly number[]>>()
++  const sectionNames = [
++    ['百万tokens输入（缓存命中）', 'inputCacheHit'],
++    ['百万tokens输入（缓存未命中）', 'inputCacheMiss'],
++    ['百万tokens输出', 'output'],
++  ] as const
++  let currentSection: string | undefined
++
++  for (const row of rows) {
++    const rowSection = sectionNames.find(([label]) => row.cells.some(cell => cell.includes(label)))?.[1]
++    if (rowSection !== undefined) currentSection = rowSection
++    const section = currentSection
++    const period = row.cells.find(cell => cell.includes('空闲时段')) !== undefined
++      ? 'idle'
++      : row.cells.find(cell => cell.includes('高峰时段')) !== undefined ? 'peak' : undefined
++    if (section === undefined || period === undefined) continue
++    const values = row.cells.slice(-modelIds.length).map(numericPrice)
++    if (values.some(value => value === undefined)) {
++      throw new Error(`DeepSeek pricing page contains an invalid ${section}/${period} row`)
++    }
++    let sectionPrices = sections.get(section)
++    if (sectionPrices === undefined) {
++      sectionPrices = new Map()
++      sections.set(section, sectionPrices)
++    }
++    sectionPrices.set(period, values as number[])
++  }
++
++  return modelIds.map((id, modelIndex) => ({
++    id,
++    version: versionRow.cells[modelIndex + 1] ?? id,
++    inputCacheHit: halfPeakPrice(sections, 'inputCacheHit', modelIndex),
++    inputCacheMiss: halfPeakPrice(sections, 'inputCacheMiss', modelIndex),
++    output: halfPeakPrice(sections, 'output', modelIndex),
++  }))
++}
++
++function beijingParts(now: Date): Readonly<Record<'year' | 'month' | 'day' | 'hour', number>> {
++  const parts = new Intl.DateTimeFormat('en-US', {
++    timeZone: 'Asia/Shanghai',
++    year: 'numeric',
++    month: '2-digit',
++    day: '2-digit',
++    hour: '2-digit',
++    hourCycle: 'h23',
++  }).formatToParts(now)
++  const value = (type: 'year' | 'month' | 'day' | 'hour'): number => {
++    const part = parts.find(item => item.type === type)?.value
++    if (part === undefined) throw new Error(`missing Beijing time part: ${type}`)
++    return Number(part)
++  }
++  return { year: value('year'), month: value('month'), day: value('day'), hour: value('hour') }
++}
++
++/**
++ * Resolve the official page's Beijing-time schedule for the supplied instant.
++ * @param now - instant to classify.
++ * @returns peak during 09:00-12:00 or 14:00-18:00, idle otherwise.
++ */
++export function pricePeriodAt(now: Date): PricePeriod {
++  const hour = beijingParts(now).hour
++  return hour >= 9 && hour < 12 || hour >= 14 && hour < 18 ? 'peak' : 'idle'
++}
++
++/**
++ * Add the current Beijing date and schedule label to parsed prices.
++ * @param models - parsed model rows.
++ * @param fetchedAt - Host fetch completion time.
++ * @param now - instant used for the current schedule label.
++ * @returns the JSON-safe browser response.
++ */
++export function createPricingSnapshot(models: readonly ModelPricing[], fetchedAt: Date, now: Date): PricingSnapshot {
++  const parts = beijingParts(now)
++  const date = `${String(parts.year).padStart(4, '0')}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
++  return {
++    source: PRICING_SOURCE,
++    fetchedAt: fetchedAt.toISOString(),
++    date,
++    timezone: 'Asia/Shanghai',
++    currentPeriod: pricePeriodAt(now),
++    models,
++  }
++}
+diff --git a/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts b/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts
+new file mode 100644
+index 0000000000..726929b0ec
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts
+@@ -0,0 +1,64 @@
++import { describe, expect, it } from 'vitest'
++import { createPricingSnapshot, parsePricingHtml, pricePeriodAt } from '../src/pricing.ts'
++
++const HTML = `
++<table>
++  <tr><td>模型</td><td>deepseek-v4-flash</td><td>deepseek-v4-pro</td></tr>
++  <tr><td colspan="3">模型版本</td><td>DeepSeek-V4-Flash-0731</td><td>DeepSeek-V4-Pro-0813</td></tr>
++  <tr><td>百万tokens输入（缓存命中）</td><td>空闲时段</td><td>0.05元</td><td>0.15元</td></tr>
++  <tr><td>高峰时段</td><td>0.10元</td><td>0.30元</td></tr>
++  <tr><td>百万tokens输入（缓存未命中）</td><td>空闲时段</td><td>1.5元</td><td>4.5元</td></tr>
++  <tr><td>高峰时段</td><td>3.0元</td><td>9.0元</td></tr>
++  <tr><td>百万tokens输出</td><td>空闲时段</td><td>4.5元</td><td>13.5元</td></tr>
++  <tr><td>高峰时段</td><td>9.0元</td><td>27.0元</td></tr>
++</table>`
++
++describe('official pricing parser', () => {
++  it('maps the official model columns and all schedule rows', () => {
++    expect(parsePricingHtml(HTML)).toEqual([
++      {
++        id: 'deepseek-v4-flash',
++        version: 'DeepSeek-V4-Flash-0731',
++        inputCacheHit: { idle: 0.05, peak: 0.1 },
++        inputCacheMiss: { idle: 1.5, peak: 3 },
++        output: { idle: 4.5, peak: 9 },
++      },
++      {
++        id: 'deepseek-v4-pro',
++        version: 'DeepSeek-V4-Pro-0813',
++        inputCacheHit: { idle: 0.15, peak: 0.3 },
++        inputCacheMiss: { idle: 4.5, peak: 9 },
++        output: { idle: 13.5, peak: 27 },
++      },
++    ])
++  })
++
++  it('uses the official Beijing peak windows', () => {
++    expect(pricePeriodAt(new Date('2026-08-19T00:59:00.000Z'))).toBe('idle')
++    expect(pricePeriodAt(new Date('2026-08-19T01:00:00.000Z'))).toBe('peak')
++    expect(pricePeriodAt(new Date('2026-08-19T03:59:00.000Z'))).toBe('peak')
++    expect(pricePeriodAt(new Date('2026-08-19T04:00:00.000Z'))).toBe('idle')
++    expect(pricePeriodAt(new Date('2026-08-19T05:59:00.000Z'))).toBe('idle')
++    expect(pricePeriodAt(new Date('2026-08-19T06:00:00.000Z'))).toBe('peak')
++    expect(pricePeriodAt(new Date('2026-08-19T09:59:00.000Z'))).toBe('peak')
++    expect(pricePeriodAt(new Date('2026-08-19T10:00:00.000Z'))).toBe('idle')
++  })
++
++  it('keeps idle prices at exactly half the peak prices', () => {
++    for (const model of parsePricingHtml(HTML)) {
++      expect(model.inputCacheHit.idle).toBe(model.inputCacheHit.peak / 2)
++      expect(model.inputCacheMiss.idle).toBe(model.inputCacheMiss.peak / 2)
++      expect(model.output.idle).toBe(model.output.peak / 2)
++    }
++  })
++
++  it('returns a JSON-safe snapshot with the current Beijing date', () => {
++    const models = parsePricingHtml(HTML)
++    expect(createPricingSnapshot(models, new Date('2026-08-19T00:00:00.000Z'), new Date('2026-08-19T01:00:00.000Z'))).toMatchObject({
++      date: '2026-08-19',
++      timezone: 'Asia/Shanghai',
++      currentPeriod: 'peak',
++      models,
++    })
++  })
++})
+diff --git a/packages/client/ui-peak-pricing/tsconfig.json b/packages/client/ui-peak-pricing/tsconfig.json
+new file mode 100644
+index 0000000000..2f76fdfb5d
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/tsconfig.json
+@@ -0,0 +1,30 @@
++{
++  "extends": "../../../tsconfig.base.client.json",
++  "compilerOptions": {
++    "rootDir": "src",
++    "outDir": "lib/types"
++  },
++  "include": [
++    "src"
++  ],
++  "references": [
++    {
++      "path": "../../../vendor/cordis"
++    },
++    {
++      "path": "../../host/webserver"
++    },
++    {
++      "path": "../ui-conversation"
++    },
++    {
++      "path": "../ui-primitives"
++    },
++    {
++      "path": "../ui-slots"
++    },
++    {
++      "path": "../../runtime-diagnostics/invariants"
++    }
++  ]
++}
+diff --git a/packages/client/ui-peak-pricing/tsdown.config.ts b/packages/client/ui-peak-pricing/tsdown.config.ts
+new file mode 100644
+index 0000000000..2bc04a72ba
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/tsdown.config.ts
+@@ -0,0 +1,3 @@
++import { clientBundle } from '../tsdown.client.ts'
++
++export default clientBundle('@deepseek-ai/dsh-client-ui-peak-pricing', ['lib/types/index.js', 'lib/types/invariant.js'])
+diff --git a/packages/client/ui-primitives/README.i18n.yaml b/packages/client/ui-primitives/README.i18n.yaml
+index bea8889dce..e22137717c 100644
+--- a/packages/client/ui-primitives/README.i18n.yaml
++++ b/packages/client/ui-primitives/README.i18n.yaml
+@@ -2,5 +2,5 @@
+ # side as of the last confirmed-consistent state. Both languages carry equal authority;
+ # after editing either side, bring the other along and re-record with:
+ #   pnpm run verify-translation-pairing --write packages/client/ui-primitives/README.md
+-README.md: f96e931472a0946bd023b97b034643f079a67e44
+-README.zh.md: bf47fa2bca6f685fc52ca6ff786439a8d51230fc
++README.md: 82cf484a37a239ed658f9965b4f88eff690ba511
++README.zh.md: 926959df0b655cd64078fd155912b8858f02c7e7
+diff --git a/packages/client/ui-primitives/README.md b/packages/client/ui-primitives/README.md
+index f96e931472..82cf484a37 100644
+--- a/packages/client/ui-primitives/README.md
++++ b/packages/client/ui-primitives/README.md
+@@ -6,7 +6,7 @@ Pure React atoms (zero cordis): StateDot, DisclosureRow, ic_ds_* icons, Button/P
+ 
+ ## Hover cards
+ 
+-`HoverCard` keeps its portaled preview reachable across the anchor gap with a pointer-leave grace. A consumer may also pass `copyText`: the card then exposes button semantics for pointer and keyboard activation, includes that value after the `copyLabel` prefix in its accessible name, writes the exact value through the package clipboard helper, and temporarily replaces its content with `copiedLabel` only after the host accepts the write. A non-collapsed text selection intersecting the card suppresses pointer-click activation, while success feedback retains the original card height and clears when the card closes or after one second. `copyLabel` and `copiedLabel` are label props because this zero-cordis atom cannot read the application locale; omitting `copyText` preserves the read/select-only card. Historical rationale: [the archived hover-card copy note](../../../.agents/notes/archived/feature/2026-07-31-hover-card-click-copy.md).
++`HoverCard` keeps its portaled preview reachable across the anchor gap with a pointer-leave grace. Its floating surface reuses the same theme-aware material as `Menu`, so the background, border, shadow, and content colors follow the Web UI's light/dark setting. The default `trigger="hover"` opens after the dwell delay; `trigger="click"` toggles from the anchor, closes on an outside pointerdown or Escape, and leaves the card open while its content is read. `placement="right"` is the default, while `placement="top"` centers the card above the anchor and falls below only when the viewport has no room above. A consumer may also pass `copyText`: the card then exposes button semantics for pointer and keyboard activation, includes that value after the `copyLabel` prefix in its accessible name, writes the exact value through the package clipboard helper, and temporarily replaces its content with `copiedLabel` only after the host accepts the write. A non-collapsed text selection intersecting the card suppresses pointer-click activation, while success feedback retains the original card height and clears when the card closes or after one second. `copyLabel` and `copiedLabel` are label props because this zero-cordis atom cannot read the application locale; omitting `copyText` preserves the read/select-only card. Historical rationale: [the archived hover-card copy note](../../../.agents/notes/archived/feature/2026-07-31-hover-card-click-copy.md).
+ 
+ ## Toast
+ 
+diff --git a/packages/client/ui-primitives/README.zh.md b/packages/client/ui-primitives/README.zh.md
+index bf47fa2bca..926959df0b 100644
+--- a/packages/client/ui-primitives/README.zh.md
++++ b/packages/client/ui-primitives/README.zh.md
+@@ -6,7 +6,7 @@
+ 
+ ## 悬浮卡片
+ 
+-`HoverCard` 通过指针离开宽限期，使采用 portal 渲染的预览在跨过与锚点之间的间隙时仍可触及。消费方还可传入 `copyText`：此时卡片为指针与键盘激活提供按钮语义，其无障碍名称会在 `copyLabel` 前缀后包含该值，通过包内剪贴板辅助函数原样写入该值，并且只有宿主接受写入后，才会临时将内容替换为 `copiedLabel`。与卡片相交的非折叠文本选区会阻止指针点击激活；成功反馈保持卡片原有高度，并随卡片关闭或在一秒后清除。`copyLabel` 和 `copiedLabel` 采用 label prop，是因为这个 zero-cordis 原子组件无法读取应用 locale；省略 `copyText` 时，卡片维持只读且可选择文本的行为。历史依据见[已归档的悬浮卡片复制 Agent Note](../../../.agents/notes/archived/feature/2026-07-31-hover-card-click-copy.md)。
++`HoverCard` 通过指针离开宽限期，使采用 portal 渲染的预览在跨过与锚点之间的间隙时仍可触及。它复用与 `Menu` 相同的主题感知浮层表面，因此背景、边框、阴影和内容颜色会跟随 Web UI 的浅色／深色设置。默认 `trigger="hover"` 会在停留延迟后打开；`trigger="click"` 则由锚点点击切换，并在点击外部或按 Escape 时关闭，阅读卡片内容时保持打开。默认 `placement="right"`，`placement="top"` 会让卡片水平居中显示在锚点上方，只有上方没有足够视口空间时才回落到下方。消费方还可传入 `copyText`：此时卡片为指针与键盘激活提供按钮语义，其无障碍名称会在 `copyLabel` 前缀后包含该值，通过包内剪贴板辅助函数原样写入该值，并且只有宿主接受写入后，才会临时将内容替换为 `copiedLabel`。与卡片相交的非折叠文本选区会阻止指针点击激活；成功反馈保持卡片原有高度，并随卡片关闭或在一秒后清除。`copyLabel` 和 `copiedLabel` 采用 label prop，是因为这个 zero-cordis 原子组件无法读取应用 locale；省略 `copyText` 时，卡片维持只读且可选择文本的行为。历史依据见[已归档的悬浮卡片复制 Agent Note](../../../.agents/notes/archived/feature/2026-07-31-hover-card-click-copy.md)。
+ 
+ ## Toast
+ 
+diff --git a/packages/client/ui-primitives/src/FloatingSurface.module.css b/packages/client/ui-primitives/src/FloatingSurface.module.css
+new file mode 100644
+index 0000000000..011612cc8d
+--- /dev/null
++++ b/packages/client/ui-primitives/src/FloatingSurface.module.css
+@@ -0,0 +1,11 @@
++/* Shared elevated surface for portaled menus and preview cards. Keeping the
++ * material here makes every floating card follow the same light/dark tokens. */
++.surface {
++  box-sizing: border-box;
++  border: 1px solid var(--dsw-alias-border-inverted);
++  border-radius: 12px;
++  background: var(--dsw-specific-menu);
++  box-shadow: var(--dsw-shadow-lv3);
++  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
++  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
++}
+diff --git a/packages/client/ui-primitives/src/HoverCard.module.css b/packages/client/ui-primitives/src/HoverCard.module.css
+index 8d425ca85c..2daa458737 100644
+--- a/packages/client/ui-primitives/src/HoverCard.module.css
++++ b/packages/client/ui-primitives/src/HoverCard.module.css
+@@ -5,21 +5,16 @@
+   display: block;
+ }
+ 
+-/* Preview card (figma session hover card): 244 wide, r12, pad 12/16, the
+- * menu card's elevation. Surface is #2C2C2E in both themes (figma value,
+- * light/dark identical), so a component-level variable, not a theme token.
+- * Hit-testable on purpose: resting the pointer on the card holds it open
++/* Preview card (figma session hover card): 244 wide, pad 12/16. The shared
++ * FloatingSurface supplies the menu card's theme-aware material. Hit-testable
++ * on purpose: resting the pointer on the card holds it open
+  * (HoverCard's grace close), which a `pointer-events: none` card cannot do. */
+ .card {
+-  --dsw-hovercard-bg: #2C2C2E;
+   position: fixed;
+-  z-index: 100;
+-  box-sizing: border-box;
++  z-index: 1100;
+   width: 244px;
+   padding: 12px 16px;
+-  border-radius: 12px;
+-  background: var(--dsw-hovercard-bg);
+-  box-shadow: var(--dsw-shadow-lv3);
++  color: var(--dsw-alias-label-primary);
+ }
+ 
+ .copyable {
+diff --git a/packages/client/ui-primitives/src/HoverCard.tsx b/packages/client/ui-primitives/src/HoverCard.tsx
+index ea14afad1f..3c14cf8b0c 100644
+--- a/packages/client/ui-primitives/src/HoverCard.tsx
++++ b/packages/client/ui-primitives/src/HoverCard.tsx
+@@ -1,4 +1,4 @@
+-// HoverCard: delayed hover-preview card portaled to document.body.
++// HoverCard: delayed hover-preview or click-toggle card portaled to document.body.
+ // Same portal mechanics as Menu: the wrapper span supplies the anchor rect,
+ // the card is fixed-positioned at its right edge and repositions on
+ // scroll/resize while open. The card is reachable: it takes pointer events,
+@@ -14,13 +14,16 @@ import { createPortal } from 'react-dom'
+ import { writeClipboard } from './clipboard.ts'
+ import { usePointerGrace } from './pointer-grace.ts'
+ import css from './HoverCard.module.css'
++import surfaceCss from './FloatingSurface.module.css'
+ 
+ /**
+- * Render an anchor with a hover-triggered preview card.
++ * Render an anchor with a hover-triggered or click-toggle preview card.
+  * @param props.anchor - the hover target (rendered in place inside a wrapper span).
+  * @param props.content - card content; the pointer may rest on it, so it is
+  * readable and selectable, but it carries no dismissal affordance of its own.
+  * @param props.openDelayMs - hover dwell before the card shows (default 500).
++ * @param props.trigger - open on hover (default) or toggle on anchor click.
++ * @param props.placement - place the card to the right (default) or centered above the anchor.
+  * @param props.disabled - suppress opening; turning true closes an open card.
+  * @param props.copyText - optional primary value copied by activation and
+  * included in the card's accessible name.
+@@ -30,12 +33,15 @@ import css from './HoverCard.module.css'
+  */
+ export function HoverCard({
+   anchor, content, openDelayMs = 500, disabled = false,
++  trigger = 'hover', placement = 'right',
+   copyText, copyLabel = '复制', copiedLabel = '复制成功',
+ }: {
+   anchor: ReactNode
+   content: ReactNode
+   openDelayMs?: number
+   disabled?: boolean
++  trigger?: 'hover' | 'click'
++  placement?: 'right' | 'top'
+   copyText?: string | undefined
+   copyLabel?: string | undefined
+   copiedLabel?: string | undefined
+@@ -84,6 +90,27 @@ export function HoverCard({
+     close()
+   }, [disabled, cancelClose, close])
+ 
++  // Click-triggered cards close immediately when another page surface is
++  // pressed, while presses inside the portaled card remain readable.
++  useEffect(() => {
++    if (trigger !== 'click' || !open) return
++    const closeOutside = (event: PointerEvent): void => {
++      const target = event.target
++      if (!(target instanceof Node)) return
++      if (rootRef.current?.contains(target) || cardRef.current?.contains(target)) return
++      close()
++    }
++    const closeOnEscape = (event: KeyboardEvent): void => {
++      if (event.key === 'Escape') close()
++    }
++    document.addEventListener('pointerdown', closeOutside)
++    document.addEventListener('keydown', closeOnEscape)
++    return () => {
++      document.removeEventListener('pointerdown', closeOutside)
++      document.removeEventListener('keydown', closeOnEscape)
++    }
++  }, [trigger, open, close])
++
+   useEffect(() => {
+     mountedRef.current = true
+     return () => {
+@@ -97,19 +124,31 @@ export function HoverCard({
+     }
+   }, [])
+ 
++  const place = useCallback(() => {
++    const wrapper = rootRef.current
++    /* v8 ignore next -- the ref is attached before the layout effect runs and the listeners die with it. */
++    if (wrapper === null) return
++    const r = wrapper.getBoundingClientRect()
++    const h = cardRef.current?.offsetHeight ?? 0
++    const width = cardRef.current?.offsetWidth || 244
++    const next = placement === 'top'
++      ? (() => {
++        const preferredTop = r.top - h - 8
++        const bottomFallback = Math.min(r.bottom + 8, Math.max(8, window.innerHeight - h - 8))
++        const left = Math.min(
++          Math.max(8, r.left + (r.width - width) / 2),
++          Math.max(8, window.innerWidth - width - 8),
++        )
++        return { left, top: preferredTop >= 8 ? preferredTop : bottomFallback }
++      })()
++      : { left: r.right + 8, top: r.top + h > window.innerHeight - 8 ? window.innerHeight - h - 8 : r.top }
++    setPos(previous => previous !== null && previous.left === next.left && previous.top === next.top ? previous : next)
++  }, [placement])
++
+   // Fixed-position from the anchor rect before paint; track the anchor while
+   // open (capture-phase scroll catches nested panes), as in Menu portal mode.
+   useLayoutEffect(() => {
+     if (!open) { setPos(null); return }
+-    const place = () => {
+-      const wrapper = rootRef.current
+-      /* v8 ignore next -- the ref is attached before the layout effect runs and the listeners die with it. */
+-      if (wrapper === null) return
+-      const r = wrapper.getBoundingClientRect()
+-      const h = cardRef.current?.offsetHeight ?? 0
+-      const top = r.top + h > window.innerHeight - 8 ? window.innerHeight - h - 8 : r.top
+-      setPos({ left: r.right + 8, top })
+-    }
+     place()
+     window.addEventListener('scroll', place, true)
+     window.addEventListener('resize', place)
+@@ -117,19 +156,22 @@ export function HoverCard({
+       window.removeEventListener('scroll', place, true)
+       window.removeEventListener('resize', place)
+     }
+-  }, [open])
++  }, [open, place])
+ 
+-  // The first placement ran before the card mounted (height read 0): once the
+-  // card's real height is measurable, correct the bottom-edge clamp. The
+-  // correction converges — a clamped top satisfies the guard, so it runs once.
++  // The card first mounts with its loading state and can grow when the official
++  // prices arrive. Recalculate after every content-size change so a top card
++  // remains above the anchor instead of overlapping it.
+   useLayoutEffect(() => {
+     if (!open || pos === null) return
++    const card = cardRef.current
+     /* v8 ignore next -- the card is mounted whenever pos is set, so the ref is attached here. */
+-    const h = cardRef.current?.offsetHeight ?? 0
+-    if (pos.top + h > window.innerHeight - 8) {
+-      setPos({ left: pos.left, top: window.innerHeight - h - 8 })
+-    }
+-  }, [open, pos])
++    if (card === null) return
++    place()
++    if (typeof ResizeObserver === 'undefined') return
++    const observer = new ResizeObserver(place)
++    observer.observe(card)
++    return () => observer.disconnect()
++  }, [open, place, pos])
+ 
+   const copy = async (text: string): Promise<void> => {
+     if (copied || copyingRef.current) return
+@@ -149,7 +191,7 @@ export function HoverCard({
+   const card = open && pos !== null && (
+     <div
+       ref={cardRef}
+-      className={`${css.card}${copyable ? ` ${css.copyable}` : ''}${copied ? ` ${css.feedback}` : ''}`}
++      className={`${surfaceCss.surface} ${css.card}${copyable ? ` ${css.copyable}` : ''}${copied ? ` ${css.feedback}` : ''}`}
+       style={{ ...pos, minHeight: copied && copyHeightRef.current !== null ? copyHeightRef.current : undefined }}
+       role={copyable ? 'button' : undefined}
+       tabIndex={copyable ? 0 : undefined}
+@@ -181,8 +223,16 @@ export function HoverCard({
+     <span
+       ref={rootRef}
+       className={css.root}
++      aria-expanded={trigger === 'click' ? open : undefined}
++      onClick={(event) => {
++        if (trigger !== 'click' || disabled) return
++        if (cardRef.current?.contains(event.target as Node)) return
++        clearTimer()
++        cancelClose()
++        setOpen(previous => !previous)
++      }}
+       onPointerEnter={() => {
+-        if (disabled) return
++        if (trigger !== 'hover' || disabled) return
+         // Coming back inside during the grace (the gap, or the card itself)
+         // keeps the current card rather than restarting the dwell.
+         cancelClose()
+@@ -191,6 +241,7 @@ export function HoverCard({
+         timerRef.current = setTimeout(() => { setOpen(true) }, openDelayMs)
+       }}
+       onPointerLeave={() => {
++        if (trigger !== 'hover') return
+         clearTimer()
+         // Leaving a closed card schedules a no-op close; only arm while
+         // open, matching Menu's shape.
+@@ -202,6 +253,7 @@ export function HoverCard({
+       // child of the wrapper — but a press there starts a selection, so the
+       // card must stay mounted under it (and the browser's click with it).
+       onPointerDownCapture={(e) => {
++        if (trigger !== 'hover') return
+         if (cardRef.current?.contains(e.target as Node)) return
+         clearTimer()
+         cancelClose()
+diff --git a/packages/client/ui-primitives/src/Menu.module.css b/packages/client/ui-primitives/src/Menu.module.css
+index 7bc0c5aced..c9f9e3dd50 100644
+--- a/packages/client/ui-primitives/src/Menu.module.css
++++ b/packages/client/ui-primitives/src/Menu.module.css
+@@ -8,22 +8,10 @@
+ .list,
+ .submenu {
+   /* min-widths below are the design's outer card widths — include the pad. */
+-  box-sizing: border-box;
+   padding: 4px;
+   display: flex;
+   flex-direction: column;
+   gap: 0;
+-  border: 1px solid var(--dsw-alias-border-inverted);
+-  border-radius: 12px;
+-  background: var(--dsw-specific-menu);
+-  box-shadow: var(--dsw-shadow-lv3);
+-  /* Elevated surface: the scrollbar thumb takes the l2 elevation tokens. The
+-     declaration sits on the card rather than on `.scrollable .viewport`
+-     because the elevation is a property of this surface, and the custom
+-     properties inherit down to whichever descendant actually scrolls (see
+-     ui-theme styles/scrollbar.css for the rebinding contract). */
+-  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+-  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+ }
+ 
+ /* Primary card is 218 wide in the design across both hosts. */
+diff --git a/packages/client/ui-primitives/src/Menu.tsx b/packages/client/ui-primitives/src/Menu.tsx
+index 46c30b8afb..fa9a2d1118 100644
+--- a/packages/client/ui-primitives/src/Menu.tsx
++++ b/packages/client/ui-primitives/src/Menu.tsx
+@@ -15,6 +15,7 @@ import clsx from 'clsx'
+ import { IconCheckOutline16 } from './icons/index.tsx'
+ import { usePointerGrace } from './pointer-grace.ts'
+ import css from './Menu.module.css'
++import surfaceCss from './FloatingSurface.module.css'
+ 
+ /** Selectable row (optionally with a nested submenu). */
+ export interface MenuItem {
+@@ -238,7 +239,7 @@ export function Menu({ open, anchor, items, selectedId, selectedIds, onSelect, o
+           {selected && <IconCheckOutline16 className={css.check} />}
+         </button>
+         {subOpen && entry.submenu !== undefined && (
+-          <div className={clsx(css.submenu, compact && css.compactList)} role="menu">
++          <div className={clsx(surfaceCss.surface, css.submenu, compact && css.compactList)} role="menu">
+             {entry.submenu.map(sub => (
+               <button
+                 key={sub.id}
+@@ -265,7 +266,7 @@ export function Menu({ open, anchor, items, selectedId, selectedIds, onSelect, o
+   const list = open && (
+     <div
+       ref={listRef}
+-      className={clsx(css.list, dense && css.denseList, compact && css.compactList, scrollable && css.scrollable, portal && css.portal, side === 'top' && !portal && css.sideTop, align === 'end' && !portal && css.alignEnd)}
++      className={clsx(surfaceCss.surface, css.list, dense && css.denseList, compact && css.compactList, scrollable && css.scrollable, portal && css.portal, side === 'top' && !portal && css.sideTop, align === 'end' && !portal && css.alignEnd)}
+       style={portal ? fixedPos ?? MEASURE_STYLE : undefined}
+       role="menu"
+       // React portals bubble synthetic events through the REACT tree: without
+diff --git a/packages/client/ui-primitives/tests/hover-card.client.spec.tsx b/packages/client/ui-primitives/tests/hover-card.client.spec.tsx
+index 53d5d2bcf7..ece6137467 100644
+--- a/packages/client/ui-primitives/tests/hover-card.client.spec.tsx
++++ b/packages/client/ui-primitives/tests/hover-card.client.spec.tsx
+@@ -20,6 +20,8 @@ function stubAnchorRect(anchor: HTMLElement, rect: { top: number; right: number
+ function mount(props: {
+   openDelayMs?: number
+   disabled?: boolean
++  trigger?: 'hover' | 'click'
++  placement?: 'right' | 'top'
+   copyText?: string
+   copyLabel?: string
+   copiedLabel?: string
+@@ -66,6 +68,45 @@ describe('HoverCard', () => {
+     expect(screen.getByText('card body')).toBeTruthy()
+   })
+ 
++  it('click trigger opens and closes only from anchor clicks', () => {
++    const { wrapper } = mount({ trigger: 'click' })
++    fireEvent.pointerEnter(wrapper)
++    act(() => { vi.advanceTimersByTime(1000) })
++    expect(screen.queryByText('card body')).toBeNull()
++    fireEvent.click(screen.getByText('row'))
++    expect(screen.getByText('card body')).toBeTruthy()
++    fireEvent.click(screen.getByText('row'))
++    expect(screen.queryByText('card body')).toBeNull()
++  })
++
++  it('click trigger closes on an outside pointerdown', () => {
++    mount({ trigger: 'click' })
++    fireEvent.click(screen.getByText('row'))
++    expect(screen.getByText('card body')).toBeTruthy()
++    fireEvent.pointerDown(document.body)
++    expect(screen.queryByText('card body')).toBeNull()
++  })
++
++  it('top placement centers the card above the anchor', () => {
++    const priorHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')
++    const priorWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')
++    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, get: () => 120 })
++    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, get: () => 244 })
++    try {
++      mount({ trigger: 'click', placement: 'top' })
++      stubAnchorRect(screen.getByText('row'), { top: 200, right: 400 })
++      fireEvent.click(screen.getByText('row'))
++      const card = screen.getByText('card body').parentElement as HTMLElement
++      expect(card.style.left).toBe('228px')
++      expect(card.style.top).toBe('72px')
++    } finally {
++      if (priorHeight === undefined) Reflect.deleteProperty(HTMLElement.prototype, 'offsetHeight')
++      else Object.defineProperty(HTMLElement.prototype, 'offsetHeight', priorHeight)
++      if (priorWidth === undefined) Reflect.deleteProperty(HTMLElement.prototype, 'offsetWidth')
++      else Object.defineProperty(HTMLElement.prototype, 'offsetWidth', priorWidth)
++    }
++  })
++
+   it('pointerleave before the delay cancels the pending open', () => {
+     const { wrapper } = mount()
+     fireEvent.pointerEnter(wrapper)
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index bcc517d651..a42521c244 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -1324,6 +1324,9 @@ importers:
+       '@deepseek-ai/dsh-client-ui-model-selection':
+         specifier: workspace:^
+         version: link:../../client/ui-model-selection
++      '@deepseek-ai/dsh-client-ui-peak-pricing':
++        specifier: workspace:^
++        version: link:../../client/ui-peak-pricing
+       '@deepseek-ai/dsh-client-ui-permission-presets':
+         specifier: workspace:^
+         version: link:../../client/ui-permission-presets
+@@ -2232,6 +2235,33 @@ importers:
+         specifier: ^18.2.0
+         version: 18.3.1
+ 
++  packages/client/ui-peak-pricing:
++    devDependencies:
++      '@deepseek-ai/cordis':
++        specifier: workspace:^
++        version: link:../../../vendor/cordis
++      '@deepseek-ai/dsh-client-ui-conversation':
++        specifier: workspace:^
++        version: link:../ui-conversation
++      '@deepseek-ai/dsh-client-ui-primitives':
++        specifier: workspace:^
++        version: link:../ui-primitives
++      '@deepseek-ai/dsh-host-webserver':
++        specifier: workspace:^
++        version: link:../../host/webserver
++      '@deepseek-ai/dsh-invariants':
++        specifier: workspace:^
++        version: link:../../runtime-diagnostics/invariants
++      '@types/react':
++        specifier: ~18.3.1
++        version: 18.3.31
++      react:
++        specifier: ^18.2.0
++        version: 18.3.1
++      react-dom:
++        specifier: ^18.2.0
++        version: 18.3.1(react@18.3.1)
++
+   packages/client/ui-permission-presets:
+     devDependencies:
+       '@deepseek-ai/cordis':
+diff --git a/tsconfig.client.json b/tsconfig.client.json
+index e599f76f1b..e240cdef25 100644
+--- a/tsconfig.client.json
++++ b/tsconfig.client.json
+@@ -81,6 +81,7 @@
+     { "path": "./packages/client/ui-model-selection" },
+     { "path": "./packages/client/ui-agent-preset" },
+     { "path": "./packages/client/ui-permission-presets" },
++    { "path": "./packages/client/ui-peak-pricing" },
+     { "path": "./packages/client/ui-plan" },
+     { "path": "./packages/client/ui-settings-plugins" },
+     { "path": "./packages/client/ui-user-questions" },
