@@ -49,7 +49,7 @@ index 000174f513..5fc2a4161f 100644
              <ContextMeter useProjection={useProjection} t={t} />
 diff --git a/packages/client/ui-peak-pricing/README.i18n.yaml b/packages/client/ui-peak-pricing/README.i18n.yaml
 new file mode 100644
-index 0000000000..143a8aad34
+index 0000000000..1c9949000e
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/README.i18n.yaml
 @@ -0,0 +1,6 @@
@@ -57,11 +57,11 @@ index 0000000000..143a8aad34
 +# side as of the last confirmed-consistent state. Both languages carry equal authority;
 +# after editing either side, bring the other along and re-record with:
 +#   pnpm run verify-translation-pairing --write packages/client/ui-peak-pricing/README.md
-+README.md: afa95d52284bbfead010947e26a2caddad80502a
-+README.zh.md: 085c36720e22e2903dfd091fd3fca4046343faca
++README.md: 7ff2932e7260625385292aa145ead2ff3a81f1ff
++README.zh.md: 4005c04145e409c4f5806b1f2f7371c7cabe4d38
 diff --git a/packages/client/ui-peak-pricing/README.md b/packages/client/ui-peak-pricing/README.md
 new file mode 100644
-index 0000000000..afa95d5228
+index 0000000000..7ff2932e72
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/README.md
 @@ -0,0 +1,20 @@
@@ -71,11 +71,11 @@ index 0000000000..afa95d5228
 +
 +Composer hint plugin for the Web UI. It occupies `conversation.input.right`, which is rendered in the visual gap between the permission control and model selector. The hint reads `现在是梁文峰时间` during Beijing peak hours and `现在是梁文谷时间` during idle hours; clicking it toggles a compact price card centered above the hint, and clicking elsewhere closes it.
 +
-+The Host fetches the [official DeepSeek pricing page](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/), parses the model/version and idle/peak RMB prices, and serves a same-origin cached JSON response. The browser never performs a cross-origin request, so the feature does not depend on third-party CORS headers.
++The Host fetches the [official DeepSeek pricing page](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/), parses every model/version column in the current table—including `deepseek-v4-flash-vision-exp`—and serves idle/peak RMB prices through a same-origin cached JSON response. The browser never performs a cross-origin request, so the feature does not depend on third-party CORS headers.
 +
 +## Model Experience
 +
-+The hint is presentation-only and adds no prompt text, session event, tool, or model-visible state. It only helps users understand the current official DeepSeek token pricing before sending a request.
++None, as the hint only renders browser UI; nothing here reaches a model request.
 +
 +#### KV Cache effect
 +
@@ -84,10 +84,10 @@ index 0000000000..afa95d5228
 +## Known Limitations and Deferred Work
 +
 +- Prices are refreshed by the Host route every 15 minutes and the official source may change its table layout; parsing failures are shown as an actionable link to the source page.
-+- The current idle/peak label uses Beijing time, matching the official pricing schedule. Idle prices are validated as exactly half of peak prices.
++- The current idle/peak label uses the official Beijing schedule: weekdays from 09:00–12:00 and 14:00–18:00 are peak hours; weekends are idle hours. Idle prices are validated as exactly half of peak prices.
 diff --git a/packages/client/ui-peak-pricing/README.zh.md b/packages/client/ui-peak-pricing/README.zh.md
 new file mode 100644
-index 0000000000..085c36720e
+index 0000000000..4005c04145
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/README.zh.md
 @@ -0,0 +1,20 @@
@@ -97,11 +97,11 @@ index 0000000000..085c36720e
 +
 +Web UI 的输入框提示插件。它占用 `conversation.input.right`，显示在权限控件与模型选择器之间的视觉空白区域。北京时间高峰时段显示 `现在是梁文峰时间`，空闲时段显示 `现在是梁文谷时间`；点击提示文字可以切换上方居中的模型价格卡片，点击其他区域会关闭卡片。
 +
-+Host 会读取 [DeepSeek 官方定价页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)，解析模型版本以及空闲／高峰时段的人民币价格，再通过同源接口提供带缓存的 JSON。浏览器不直接跨域请求，因此不依赖第三方 CORS 响应头。
++Host 会读取 [DeepSeek 官方定价页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)，解析当前表格中的全部模型／版本列（包括 `deepseek-v4-flash-vision-exp`）以及空闲／高峰时段的人民币价格，再通过同源接口提供带缓存的 JSON。浏览器不直接跨域请求，因此不依赖第三方 CORS 响应头。
 +
 +## 模型体验
 +
-+该提示只负责展示，不会增加 prompt、会话事件、工具或模型可见状态；它用于帮助用户在发送请求前了解 DeepSeek 官方 token 价格。
++无，因为该提示只渲染浏览器 UI，不会进入模型请求。
 +
 +#### KV Cache 影响
 +
@@ -110,7 +110,7 @@ index 0000000000..085c36720e
 +## 已知局限与延后工作
 +
 +- Host 接口每 15 分钟刷新一次价格；如果官方页面调整表格结构，卡片会显示可点击的官方页面链接。
-+- 当前时段标签使用北京时间，与官方定价页的时段说明一致；空闲价格会校验为高峰价格的一半。
++- 当前时段标签遵循官方北京时间规则：工作日 09:00–12:00、14:00–18:00 为高峰时段，周末全天为空闲时段；空闲价格会校验为高峰价格的一半。
 diff --git a/packages/client/ui-peak-pricing/package.json b/packages/client/ui-peak-pricing/package.json
 new file mode 100644
 index 0000000000..3e3ed30c50
@@ -666,10 +666,10 @@ index 0000000000..eb0c5e5317
 +/* jscpd:ignore-end */
 diff --git a/packages/client/ui-peak-pricing/src/pricing.ts b/packages/client/ui-peak-pricing/src/pricing.ts
 new file mode 100644
-index 0000000000..33adf9e927
+index 0000000000..6715c268e0
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/pricing.ts
-@@ -0,0 +1,186 @@
+@@ -0,0 +1,198 @@
 +/** Runtime parser and wire vocabulary for the official DeepSeek pricing page. */
 +
 +/** Official source used by the Host fetcher. */
@@ -713,6 +713,10 @@ index 0000000000..33adf9e927
 +    .replace(/&gt;/gi, '>')
 +    .replace(/\s+/g, ' ')
 +    .trim()
++}
++
++function compactText(value: string): string {
++  return value.replaceAll(/\s+/g, '')
 +}
 +
 +function rowsOf(html: string): readonly PricingRow[] {
@@ -782,7 +786,7 @@ index 0000000000..33adf9e927
 +  let currentSection: string | undefined
 +
 +  for (const row of rows) {
-+    const rowSection = sectionNames.find(([label]) => row.cells.some(cell => cell.includes(label)))?.[1]
++    const rowSection = sectionNames.find(([label]) => row.cells.some(cell => compactText(cell).includes(compactText(label))))?.[1]
 +    if (rowSection !== undefined) currentSection = rowSection
 +    const section = currentSection
 +    const period = row.cells.find(cell => cell.includes('空闲时段')) !== undefined
@@ -810,7 +814,9 @@ index 0000000000..33adf9e927
 +  }))
 +}
 +
-+function beijingParts(now: Date): Readonly<Record<'year' | 'month' | 'day' | 'hour', number>> {
++type BeijingWeekday = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat'
++
++function beijingParts(now: Date): Readonly<Record<'year' | 'month' | 'day' | 'hour', number> & { weekday: BeijingWeekday }> {
 +  const parts = new Intl.DateTimeFormat('en-US', {
 +    timeZone: 'Asia/Shanghai',
 +    year: 'numeric',
@@ -818,23 +824,29 @@ index 0000000000..33adf9e927
 +    day: '2-digit',
 +    hour: '2-digit',
 +    hourCycle: 'h23',
++    weekday: 'short',
 +  }).formatToParts(now)
 +  const value = (type: 'year' | 'month' | 'day' | 'hour'): number => {
 +    const part = parts.find(item => item.type === type)?.value
 +    if (part === undefined) throw new Error(`missing Beijing time part: ${type}`)
 +    return Number(part)
 +  }
-+  return { year: value('year'), month: value('month'), day: value('day'), hour: value('hour') }
++  const weekday = parts.find(item => item.type === 'weekday')?.value
++  if (weekday === undefined || !['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].includes(weekday)) {
++    throw new Error(`invalid Beijing weekday: ${String(weekday)}`)
++  }
++  return { year: value('year'), month: value('month'), day: value('day'), hour: value('hour'), weekday: weekday as BeijingWeekday }
 +}
 +
 +/**
 + * Resolve the official page's Beijing-time schedule for the supplied instant.
 + * @param now - instant to classify.
-+ * @returns peak during 09:00-12:00 or 14:00-18:00, idle otherwise.
++ * @returns peak on weekdays during 09:00-12:00 or 14:00-18:00, idle otherwise.
 + */
 +export function pricePeriodAt(now: Date): PricePeriod {
-+  const hour = beijingParts(now).hour
-+  return hour >= 9 && hour < 12 || hour >= 14 && hour < 18 ? 'peak' : 'idle'
++  const { hour, weekday } = beijingParts(now)
++  const weekdayPeak = weekday !== 'Sat' && weekday !== 'Sun'
++  return weekdayPeak && (hour >= 9 && hour < 12 || hour >= 14 && hour < 18) ? 'peak' : 'idle'
 +}
 +
 +/**
@@ -858,23 +870,23 @@ index 0000000000..33adf9e927
 +}
 diff --git a/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts b/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts
 new file mode 100644
-index 0000000000..726929b0ec
+index 0000000000..6cfa162c66
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,73 @@
 +import { describe, expect, it } from 'vitest'
 +import { createPricingSnapshot, parsePricingHtml, pricePeriodAt } from '../src/pricing.ts'
 +
 +const HTML = `
 +<table>
-+  <tr><td>模型</td><td>deepseek-v4-flash</td><td>deepseek-v4-pro</td></tr>
-+  <tr><td colspan="3">模型版本</td><td>DeepSeek-V4-Flash-0731</td><td>DeepSeek-V4-Pro-0813</td></tr>
-+  <tr><td>百万tokens输入（缓存命中）</td><td>空闲时段</td><td>0.05元</td><td>0.15元</td></tr>
-+  <tr><td>高峰时段</td><td>0.10元</td><td>0.30元</td></tr>
-+  <tr><td>百万tokens输入（缓存未命中）</td><td>空闲时段</td><td>1.5元</td><td>4.5元</td></tr>
-+  <tr><td>高峰时段</td><td>3.0元</td><td>9.0元</td></tr>
-+  <tr><td>百万tokens输出</td><td>空闲时段</td><td>4.5元</td><td>13.5元</td></tr>
-+  <tr><td>高峰时段</td><td>9.0元</td><td>27.0元</td></tr>
++  <tr><td>模型</td><td>deepseek-v4-flash</td><td>deepseek-v4-pro</td><td>deepseek-v4-flash-vision-exp</td></tr>
++  <tr><td colspan="4">模型版本</td><td>DeepSeek-V4-Flash-0731</td><td>DeepSeek-V4-Pro-0813</td><td>DeepSeek-V4-Flash-Vision-Exp</td></tr>
++  <tr><td>百万tokens输入<br>（缓存命中）</td><td>空闲时段</td><td>0.05元</td><td>0.15元</td><td>0.05元</td></tr>
++  <tr><td>高峰时段</td><td>0.10元</td><td>0.30元</td><td>0.10元</td></tr>
++  <tr><td>百万tokens输入<br>（缓存未命中）</td><td>空闲时段</td><td>1.5元</td><td>4.5元</td><td>1.5元</td></tr>
++  <tr><td>高峰时段</td><td>3.0元</td><td>9.0元</td><td>3.0元</td></tr>
++  <tr><td>百万tokens输出</td><td>空闲时段</td><td>4.5元</td><td>13.5元</td><td>4.5元</td></tr>
++  <tr><td>高峰时段</td><td>9.0元</td><td>27.0元</td><td>9.0元</td></tr>
 +</table>`
 +
 +describe('official pricing parser', () => {
@@ -894,10 +906,17 @@ index 0000000000..726929b0ec
 +        inputCacheMiss: { idle: 4.5, peak: 9 },
 +        output: { idle: 13.5, peak: 27 },
 +      },
++      {
++        id: 'deepseek-v4-flash-vision-exp',
++        version: 'DeepSeek-V4-Flash-Vision-Exp',
++        inputCacheHit: { idle: 0.05, peak: 0.1 },
++        inputCacheMiss: { idle: 1.5, peak: 3 },
++        output: { idle: 4.5, peak: 9 },
++      },
 +    ])
 +  })
 +
-+  it('uses the official Beijing peak windows', () => {
++  it('uses the official Beijing weekday peak windows', () => {
 +    expect(pricePeriodAt(new Date('2026-08-19T00:59:00.000Z'))).toBe('idle')
 +    expect(pricePeriodAt(new Date('2026-08-19T01:00:00.000Z'))).toBe('peak')
 +    expect(pricePeriodAt(new Date('2026-08-19T03:59:00.000Z'))).toBe('peak')
@@ -906,6 +925,8 @@ index 0000000000..726929b0ec
 +    expect(pricePeriodAt(new Date('2026-08-19T06:00:00.000Z'))).toBe('peak')
 +    expect(pricePeriodAt(new Date('2026-08-19T09:59:00.000Z'))).toBe('peak')
 +    expect(pricePeriodAt(new Date('2026-08-19T10:00:00.000Z'))).toBe('idle')
++    expect(pricePeriodAt(new Date('2026-08-22T01:00:00.000Z'))).toBe('idle')
++    expect(pricePeriodAt(new Date('2026-08-23T06:00:00.000Z'))).toBe('idle')
 +  })
 +
 +  it('keeps idle prices at exactly half the peak prices', () => {
@@ -1409,6 +1430,18 @@ index bcc517d651..a42521c244 100644
    packages/client/ui-permission-presets:
      devDependencies:
        '@deepseek-ai/cordis':
+diff --git a/scripts/verify-package-readme-model-experience.ts b/scripts/verify-package-readme-model-experience.ts
+index d38b4743c5..f42a71e8d1 100644
+--- a/scripts/verify-package-readme-model-experience.ts
++++ b/scripts/verify-package-readme-model-experience.ts
+@@ -62,6 +62,7 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
+   'packages/test-support/client-runtime': { kind: 'none', reason: 'Browser-side test infrastructure (jsdom bench); registers nothing model-facing.' },
+   'packages/client/ui-slots': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
+   'packages/client/ui-attachment': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
++  'packages/client/ui-peak-pricing': { kind: 'none', reason: 'Browser-side pricing display; registers nothing model-facing.' },
+   'packages/client/ui-primitives': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
+   'packages/client/web-react': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
+   'packages/client/schema-form': { kind: 'none', reason: 'Browser-side form-rendering library; registers nothing model-facing.' },
 diff --git a/tsconfig.client.json b/tsconfig.client.json
 index e599f76f1b..e240cdef25 100644
 --- a/tsconfig.client.json
