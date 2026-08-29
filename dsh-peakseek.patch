@@ -1,3 +1,244 @@
+diff --git a/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.i18n.yaml b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.i18n.yaml
+new file mode 100644
+index 0000000000..2ddc0565cc
+--- /dev/null
++++ b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.i18n.yaml
+@@ -0,0 +1,6 @@
++# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
++# side as of the last confirmed-consistent state. Both languages carry equal authority;
++# after editing either side, bring the other along and re-record with:
++#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md
++2026-08-19-composer-official-pricing-hint.md: ffbaa834f7cba40fefe4a2bb3d287f44d5189270
++2026-08-19-composer-official-pricing-hint.zh.md: 3b2c392ade27de8f2fa667c1e5a64fc7022620d5
+diff --git a/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md
+new file mode 100644
+index 0000000000..ffbaa834f7
+--- /dev/null
++++ b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md
+@@ -0,0 +1,35 @@
++# Agent Note: Composer official pricing hint
++
++Status: implemented
++
++English | [中文](2026-08-19-composer-official-pricing-hint.zh.md)
++
++## Problem
++
++The composer needed a small, discoverable reminder about the current DeepSeek peak/off-peak window without changing the existing model and permission controls. Users also needed the current model prices without leaving the composer, while the source page is an external documentation page that is not a reliable browser-side data endpoint.
++
++## Decision
++
++Add a dedicated `@deepseek-ai/dsh-client-ui-peak-pricing` plugin package. Its Client half registers the existing `conversation.input.right` slot, so the notice stays between the permission and model controls and remains additive to the core InputBar layout. The notice is centered within the composer card and uses the existing primitives `HoverCard` and design tokens.
++
++The Host half fetches and parses the official DeepSeek pricing page through a same-origin route at `/plugins/deepseek-pricing/data`. The route caches the parsed table for 15 minutes, recalculates the Beijing current period for every response, and returns a visible source link and an error state when the source is unavailable. The Client keeps a shared in-flight request and displays the official table's cache-hit, cache-miss, and output prices for each model version.
++
++The Client resolves the visible notice from the current Beijing period and checks it every 30 seconds, so the anchor changes to `现在是梁文峰时间` on weekdays during 09:00–12:00 or 14:00–18:00, and to `现在是梁文谷时间` during all other periods. The parser treats idle pricing as an invariant: every idle value must equal half of its corresponding peak value.
++
++The source of truth is [DeepSeek's official pricing page](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/); prices and the current model columns are not hard-coded into the UI.
++
++## Alternatives considered
++
++**Browser-side cross-origin fetch** — rejected. The documentation page is not a stable same-origin API for the Web UI, and relying on browser CORS headers would make the feature fail independently of the official page's availability.
++
++**Changing the core InputBar** — rejected. The existing slot is the intended extension point and avoids coupling a pricing-only feature to the shared composer implementation.
++
++**Hard-coding the current prices** — rejected. It would become stale when DeepSeek changes the official table and would not satisfy the requested daily pricing source.
++
++## Consequences
++
++The notice adds one small Client package, one same-origin Host route, and a parser coupled to the structure and labels of the official pricing table. A source outage is visible as a recoverable notice rather than an empty or misleading price card. The 30-second period refresh avoids requiring a page reload at a schedule boundary. The feature does not alter prompt submission, model selection, permission selection, or the existing startup batch file.
++
++## Verification
++
++The parser tests cover the three current model columns, cache-hit and cache-miss prices, weekday and weekend Beijing periods, and snapshot dates. A live smoke request parses the current official page into its published model versions. The full repository build passed. The local Web UI was checked visually: the notice appeared in the requested position, clicking opened the price card, the official link was present, and no browser errors were reported.
+diff --git a/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.zh.md b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.zh.md
+new file mode 100644
+index 0000000000..3b2c392ade
+--- /dev/null
++++ b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.zh.md
+@@ -0,0 +1,35 @@
++# Agent Note: Composer 官方价格提示
++
++Status: implemented
++
++[English](2026-08-19-composer-official-pricing-hint.md) | 中文
++
++## 问题
++
++输入框需要一个醒目的小提示，用来说明当前 DeepSeek 高峰/空闲时段，但不能改变现有的模型选择和权限控制。用户还需要在不离开输入框的情况下查看今日模型价格；而价格来源是外部文档页，并不是适合直接由浏览器调用的稳定数据接口。
++
++## 决策
++
++新增独立的 `@deepseek-ai/dsh-client-ui-peak-pricing` 插件包。Client 侧注册现有的 `conversation.input.right` 插槽，因此提示会保持在权限控制和模型选择之间，并以附加内容的方式接入，不改动核心 InputBar 布局。提示在输入框卡片内居中，并复用现有的 `HoverCard` 和设计令牌。
++
++Host 侧通过同源路由 `/plugins/deepseek-pricing/data` 获取并解析 DeepSeek 官方价格页。该路由对解析后的表格缓存 15 分钟，每次响应都会重新计算北京时间对应的当前时段；当官方页面不可用时，界面会显示可见的错误状态和来源链接。Client 侧复用同一个进行中的请求，并按模型版本展示官方表格中的缓存命中、缓存未命中和输出价格。
++
++Client 侧根据当前北京时间决定可见提示，并每 30 秒检查一次，因此工作日 09:00–12:00 或 14:00–18:00 显示 `现在是梁文峰时间`，其余时段（包括周末）显示 `现在是梁文谷时间`。解析器把空闲价格作为不变量校验：每个空闲价格都必须等于对应高峰价格的一半。
++
++价格和模型列的权威来源是 [DeepSeek 官方定价页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)，它们没有硬编码在界面中。
++
++## 曾考虑的替代方案
++
++**由浏览器直接跨域请求**：否决。文档页不是 Web UI 的同源 API，依赖浏览器 CORS 响应头会让功能受跨域策略影响，而不是只取决于官方页面是否可访问。
++
++**修改核心 InputBar**：否决。现有插槽就是预留的扩展点，可以避免价格功能与共享输入框实现产生耦合。
++
++**把当前价格硬编码**：否决。DeepSeek 更新官方表格后，硬编码价格会过期，也不符合用户要求从官方价格页获取每日价格。
++
++## 后果
++
++该功能新增一个小型 Client 包和一个同源 Host 路由，并且解析器依赖官方价格表的结构与标签。当来源暂时不可用时，界面会显示可恢复的错误提示，而不是展示空白或可能误导用户的价格卡。每 30 秒刷新时段可以避免用户必须重新加载页面才能跨过时段边界。该功能不会改变提示词提交、模型选择、权限选择或既有启动 bat 文件。
++
++## 验证
++
++解析器测试覆盖当前三个模型列、缓存命中和缓存未命中价格、工作日与周末的北京时间时段以及快照日期。真实请求冒烟测试能够将当前官方页面解析为其已发布的模型版本。完整仓库构建已通过。本地 Web UI 已完成视觉检查：提示出现在指定位置，点击提示可以打开价格卡，官方链接正常显示，浏览器没有报错。
+diff --git a/DSH-peakseek-installer.bat b/DSH-peakseek-installer.bat
+new file mode 100644
+index 0000000000..98ce489c0e
+--- /dev/null
++++ b/DSH-peakseek-installer.bat
+@@ -0,0 +1,141 @@
++@echo off
++setlocal EnableExtensions
++title DSH-peakseek Installer
++
++rem Put this file beside the existing deepseek-harness folder and run it.
++rem Example:
++rem   E:\DSH\DSH-peakseek-installer.bat
++rem   E:\DSH\deepseek-harness\
++
++set "DSH_DIR=%~dp0deepseek-harness"
++set "PATCH_FILE=%~dp0dsh-peakseek.patch"
++set "PLUGIN_ARCHIVE=%~dp0dsh-peakseek-plugin.zip"
++set "PATCH_URL=https://github.com/ROOOOOYczx/DSH-peakseek/releases/latest/download/dsh-peakseek.patch"
++set "PLUGIN_ARCHIVE_URL=https://github.com/ROOOOOYczx/DSH-peakseek/releases/latest/download/dsh-peakseek-plugin.zip"
++
++rem Make common user-local tool locations available without elevation.
++set "PATH=%LOCALAPPDATA%\Programs\nodejs-portable;%LOCALAPPDATA%\pnpm\bin;%PATH%"
++
++echo.
++echo DSH-peakseek 一键补丁程序
++echo 目标目录：%DSH_DIR%
++echo.
++
++where git >nul 2>&1
++if errorlevel 1 (
++    echo [错误] 未找到 Git，请先安装 Git for Windows。
++    goto :failed
++)
++
++where node >nul 2>&1
++if errorlevel 1 (
++    echo [错误] 未找到 Node.js，请先安装 Node.js 22 或更高版本。
++    goto :failed
++)
++
++where pnpm >nul 2>&1
++if errorlevel 1 (
++    echo [错误] 未找到 pnpm，请先执行：npm install --global pnpm@11.7.0
++    goto :failed
++)
++
++if not exist "%DSH_DIR%\package.json" (
++    echo [错误] 脚本必须放在 deepseek-harness 文件夹的上一级目录。
++    goto :failed
++)
++
++if not exist "%DSH_DIR%\.git" (
++    echo [错误] 目标 DSH 不是 Git 仓库，无法安全应用补丁。
++    goto :failed
++)
++
++if exist "%DSH_DIR%\packages\client\ui-peak-pricing\package.json" goto :upgrade
++
++rem Do not overwrite unrelated uncommitted changes in the existing DSH.
++for /f "delims=" %%A in ('git -C "%DSH_DIR%" status --porcelain') do set "DSH_DIRTY=1"
++if defined DSH_DIRTY (
++    echo [错误] DSH 目录存在未提交修改，请先备份或提交后再运行。
++    goto :failed
++)
++
++if not exist "%PATCH_FILE%" goto :download_patch
++goto :apply_patch
++
++:download_patch
++set "PATCH_FILE=%TEMP%\dsh-peakseek-%RANDOM%.patch"
++echo 正在下载插件补丁...
++powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -UseBasicParsing -Uri '%PATCH_URL%' -OutFile '%PATCH_FILE%'"
++if errorlevel 1 (
++    echo [错误] 插件补丁下载失败。
++    goto :failed
++)
++
++:apply_patch
++echo 正在修补现有 DSH...
++git -C "%DSH_DIR%" apply --3way --whitespace=nowarn "%PATCH_FILE%"
++if errorlevel 1 (
++    echo [错误] 补丁无法应用，可能是 DSH 版本不兼容。
++    goto :failed
++)
++goto :prepare
++
++:upgrade
++echo 检测到已安装的 DSH-peakseek，正在升级插件文件...
++if not exist "%PLUGIN_ARCHIVE%" goto :download_plugin_archive
++goto :backup_plugin
++
++:download_plugin_archive
++set "PLUGIN_ARCHIVE=%TEMP%\dsh-peakseek-plugin-%RANDOM%%RANDOM%.zip"
++echo 正在下载最新插件文件...
++powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -UseBasicParsing -Uri '%PLUGIN_ARCHIVE_URL%' -OutFile '%PLUGIN_ARCHIVE%'"
++if errorlevel 1 (
++    echo [错误] 最新插件文件下载失败。
++    goto :failed
++)
++
++:backup_plugin
++set "BACKUP_DIR=%TEMP%\DSH-peakseek-backup-%RANDOM%%RANDOM%"
++powershell -NoProfile -ExecutionPolicy Bypass -Command "Copy-Item -LiteralPath '%DSH_DIR%\packages\client\ui-peak-pricing' -Destination '%BACKUP_DIR%' -Recurse -Force"
++if errorlevel 1 (
++    echo [错误] 无法备份现有插件文件。
++    goto :failed
++)
++
++powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%PLUGIN_ARCHIVE%' -DestinationPath '%DSH_DIR%' -Force"
++if errorlevel 1 (
++    echo [错误] 最新插件文件无法解压到 DSH 目录。
++    echo 已有插件备份：%BACKUP_DIR%
++    goto :failed
++)
++echo 已有插件备份：%BACKUP_DIR%
++
++:prepare
++echo 正在关闭旧的 DSH Web 进程...
++powershell -NoProfile -ExecutionPolicy Bypass -Command "$listeners = Get-NetTCPConnection -LocalPort 3080 -State Listen -ErrorAction SilentlyContinue; foreach ($listener in $listeners) { $processId = $listener.OwningProcess; $process = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $processId) -ErrorAction SilentlyContinue; if ($null -ne $process -and $process.CommandLine -match 'apps[\\/]cli[\\/]src[\\/]bin\.ts.+web') { Stop-Process -Id $processId -Force -ErrorAction Stop; Write-Host ('已停止 DSH Web 进程：' + $processId) } }"
++if errorlevel 1 echo [警告] 旧 DSH 进程未能自动关闭；若端口被占用，请手动关闭旧窗口后重试。
++
++:build
++echo 正在安装依赖并重新构建 Web UI，这一步可能需要几分钟...
++cd /d "%DSH_DIR%"
++call pnpm install --frozen-lockfile
++if errorlevel 1 goto :failed
++
++call pnpm run build
++if errorlevel 1 goto :failed
++
++echo 修补完成，正在启动 DSH Web UI...
++if exist "%DSH_DIR%\start-dsh.bat" (
++    call "%DSH_DIR%\start-dsh.bat"
++) else (
++    call pnpm dsh web
++)
++goto :done
++
++:failed
++echo.
++echo 修补未完成，请根据上面的提示处理后重新运行。
++pause
++exit /b 1
++
++:done
++endlocal
 diff --git a/packages/bundle/web-app/cordis.patch.yml b/packages/bundle/web-app/cordis.patch.yml
 index b06e63b54f..1f2e04a8f8 100644
 --- a/packages/bundle/web-app/cordis.patch.yml
@@ -1442,6 +1683,56 @@ index d38b4743c5..f42a71e8d1 100644
    'packages/client/ui-primitives': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
    'packages/client/web-react': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
    'packages/client/schema-form': { kind: 'none', reason: 'Browser-side form-rendering library; registers nothing model-facing.' },
+diff --git a/start-dsh.bat b/start-dsh.bat
+new file mode 100644
+index 0000000000..e03f168e01
+--- /dev/null
++++ b/start-dsh.bat
+@@ -0,0 +1,44 @@
++@echo off
++setlocal
++title DeepSeek Harness
++
++cd /d "%~dp0"
++
++rem Use the user-local portable Node.js installed for this machine.
++set "NODE_PORTABLE=%LOCALAPPDATA%\Programs\nodejs-portable"
++if exist "%NODE_PORTABLE%\node.exe" set "PATH=%NODE_PORTABLE%;%PATH%"
++
++rem Make the user-local pnpm installation available in fresh cmd windows.
++set "PNPM_BIN=%LOCALAPPDATA%\pnpm\bin"
++if exist "%PNPM_BIN%\pnpm.cmd" set "PATH=%PNPM_BIN%;%PATH%"
++
++where node >nul 2>&1
++if errorlevel 1 (
++    echo [ERROR] Node.js was not found.
++    echo Please reinstall Node.js or check the user PATH.
++    pause
++    exit /b 1
++)
++
++where pnpm >nul 2>&1
++if errorlevel 1 (
++    echo [ERROR] pnpm was not found.
++    echo Please install pnpm 11.7.0 with: npm install --global pnpm@11.7.0
++    pause
++    exit /b 1
++)
++
++echo Starting DeepSeek Harness Web UI...
++echo URL: http://127.0.0.1:3080
++echo Press Ctrl+C to stop the service.
++echo.
++
++pnpm dsh web
++
++if errorlevel 1 (
++    echo.
++    echo [ERROR] DeepSeek Harness failed to start.
++    pause
++)
++
++endlocal
 diff --git a/tsconfig.client.json b/tsconfig.client.json
 index e599f76f1b..e240cdef25 100644
 --- a/tsconfig.client.json
