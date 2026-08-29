@@ -1,6 +1,6 @@
 diff --git a/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.i18n.yaml b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.i18n.yaml
 new file mode 100644
-index 0000000000..2ddc0565cc
+index 0000000000000000000000000000000000000000..2ddc0565cc42d6891dc539f0b5ebb1c45862d888
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.i18n.yaml
 @@ -0,0 +1,6 @@
@@ -12,7 +12,7 @@ index 0000000000..2ddc0565cc
 +2026-08-19-composer-official-pricing-hint.zh.md: 3b2c392ade27de8f2fa667c1e5a64fc7022620d5
 diff --git a/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md
 new file mode 100644
-index 0000000000..ffbaa834f7
+index 0000000000000000000000000000000000000000..ffbaa834f7cba40fefe4a2bb3d287f44d5189270
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.md
 @@ -0,0 +1,35 @@
@@ -53,7 +53,7 @@ index 0000000000..ffbaa834f7
 +The parser tests cover the three current model columns, cache-hit and cache-miss prices, weekday and weekend Beijing periods, and snapshot dates. A live smoke request parses the current official page into its published model versions. The full repository build passed. The local Web UI was checked visually: the notice appeared in the requested position, clicking opened the price card, the official link was present, and no browser errors were reported.
 diff --git a/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.zh.md b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.zh.md
 new file mode 100644
-index 0000000000..3b2c392ade
+index 0000000000000000000000000000000000000000..3b2c392ade27de8f2fa667c1e5a64fc7022620d5
 --- /dev/null
 +++ b/.agents/notes/implemented/feature/2026-08-19-composer-official-pricing-hint.zh.md
 @@ -0,0 +1,35 @@
@@ -94,7 +94,7 @@ index 0000000000..3b2c392ade
 +解析器测试覆盖当前三个模型列、缓存命中和缓存未命中价格、工作日与周末的北京时间时段以及快照日期。真实请求冒烟测试能够将当前官方页面解析为其已发布的模型版本。完整仓库构建已通过。本地 Web UI 已完成视觉检查：提示出现在指定位置，点击提示可以打开价格卡，官方链接正常显示，浏览器没有报错。
 diff --git a/DSH-peakseek-installer.bat b/DSH-peakseek-installer.bat
 new file mode 100644
-index 0000000000..98ce489c0e
+index 0000000000000000000000000000000000000000..98ce489c0e0c73448417f5d7db2029d5379be546
 --- /dev/null
 +++ b/DSH-peakseek-installer.bat
 @@ -0,0 +1,141 @@
@@ -240,7 +240,7 @@ index 0000000000..98ce489c0e
 +:done
 +endlocal
 diff --git a/packages/bundle/web-app/cordis.patch.yml b/packages/bundle/web-app/cordis.patch.yml
-index b06e63b54f..1f2e04a8f8 100644
+index b06e63b54f465aa31c58cb17ca648412128e97ee..1f2e04a8f85e38265c909a004ce2027d6f8af985 100644
 --- a/packages/bundle/web-app/cordis.patch.yml
 +++ b/packages/bundle/web-app/cordis.patch.yml
 @@ -253,6 +253,10 @@
@@ -255,7 +255,7 @@ index b06e63b54f..1f2e04a8f8 100644
      # sessions created later. Absent a roster it renders nothing.
      - id: ui-agent-preset
 diff --git a/packages/bundle/web-app/package.json b/packages/bundle/web-app/package.json
-index ad9ec48fae..c53218b20f 100644
+index ad9ec48faeb3fd14006d6f5409c35b2cd9abfbd7..c53218b20f6c9ea162f43620332dbf8fb2697132 100644
 --- a/packages/bundle/web-app/package.json
 +++ b/packages/bundle/web-app/package.json
 @@ -66,6 +66,7 @@
@@ -267,7 +267,7 @@ index ad9ec48fae..c53218b20f 100644
      "@deepseek-ai/dsh-client-ui-settings-plugins": "workspace:^",
      "@deepseek-ai/dsh-client-ui-user-questions": "workspace:^",
 diff --git a/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx b/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx
-index 000174f513..5fc2a4161f 100644
+index 000174f513076a7d9ad8bf0f143989a7c571dddf..5fc2a4161f3c39c876d740440e878e5200fc8bdf 100644
 --- a/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx
 +++ b/packages/client/ui-conversation/src/client/skeleton/InputBar.tsx
 @@ -746,7 +746,7 @@ export function InputBar({
@@ -290,7 +290,7 @@ index 000174f513..5fc2a4161f 100644
              <ContextMeter useProjection={useProjection} t={t} />
 diff --git a/packages/client/ui-peak-pricing/README.i18n.yaml b/packages/client/ui-peak-pricing/README.i18n.yaml
 new file mode 100644
-index 0000000000..1c9949000e
+index 0000000000000000000000000000000000000000..1c9949000e3e0c2535ded128e2cfdd976adf0e78
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/README.i18n.yaml
 @@ -0,0 +1,6 @@
@@ -302,7 +302,7 @@ index 0000000000..1c9949000e
 +README.zh.md: 4005c04145e409c4f5806b1f2f7371c7cabe4d38
 diff --git a/packages/client/ui-peak-pricing/README.md b/packages/client/ui-peak-pricing/README.md
 new file mode 100644
-index 0000000000..7ff2932e72
+index 0000000000000000000000000000000000000000..7ff2932e7260625385292aa145ead2ff3a81f1ff
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/README.md
 @@ -0,0 +1,20 @@
@@ -328,7 +328,7 @@ index 0000000000..7ff2932e72
 +- The current idle/peak label uses the official Beijing schedule: weekdays from 09:00–12:00 and 14:00–18:00 are peak hours; weekends are idle hours. Idle prices are validated as exactly half of peak prices.
 diff --git a/packages/client/ui-peak-pricing/README.zh.md b/packages/client/ui-peak-pricing/README.zh.md
 new file mode 100644
-index 0000000000..4005c04145
+index 0000000000000000000000000000000000000000..4005c04145e409c4f5806b1f2f7371c7cabe4d38
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/README.zh.md
 @@ -0,0 +1,20 @@
@@ -354,7 +354,7 @@ index 0000000000..4005c04145
 +- 当前时段标签遵循官方北京时间规则：工作日 09:00–12:00、14:00–18:00 为高峰时段，周末全天为空闲时段；空闲价格会校验为高峰价格的一半。
 diff --git a/packages/client/ui-peak-pricing/package.json b/packages/client/ui-peak-pricing/package.json
 new file mode 100644
-index 0000000000..3e3ed30c50
+index 0000000000000000000000000000000000000000..3e3ed30c50b3e1fa243f961ae183e957fdb18636
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/package.json
 @@ -0,0 +1,69 @@
@@ -429,10 +429,10 @@ index 0000000000..3e3ed30c50
 +}
 diff --git a/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.module.css b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.module.css
 new file mode 100644
-index 0000000000..ba47c8d430
+index 0000000000000000000000000000000000000000..1ebb2ee2a7c081aa2ec494a297989577af702c50
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.module.css
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,154 @@
 +.root {
 +  position: absolute;
 +  transform: translateX(-50%);
@@ -523,10 +523,31 @@ index 0000000000..ba47c8d430
 +  color: var(--dsw-alias-label-tertiary);
 +}
 +
-+.priceGrid strong {
-+  color: var(--dsw-alias-label-primary);
-+  font-weight: 500;
++.priceValues {
++  display: inline-flex;
++  align-items: baseline;
++  gap: 4px;
 +  white-space: nowrap;
++}
++
++.currentPrice {
++  color: var(--dsw-alias-label-primary);
++  font-size: 12px;
++  font-weight: 600;
++}
++
++.priceSeparator,
++.otherPrice {
++  font-size: 11px;
++  font-weight: 400;
++}
++
++.priceSeparator {
++  color: var(--dsw-alias-label-caption);
++}
++
++.otherPrice {
++  color: var(--dsw-alias-label-tertiary);
 +}
 +
 +.legend {
@@ -568,10 +589,10 @@ index 0000000000..ba47c8d430
 +}
 diff --git a/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.tsx b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.tsx
 new file mode 100644
-index 0000000000..944db7d848
+index 0000000000000000000000000000000000000000..75c4e9a47b103c91b0c74c373c1ed678afb05cb0
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/client/PeakPricingNotice.tsx
-@@ -0,0 +1,139 @@
+@@ -0,0 +1,150 @@
 +import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 +import { HoverCard } from '@deepseek-ai/dsh-client-ui-primitives'
 +import { pricePeriodAt } from '../pricing.ts'
@@ -598,23 +619,34 @@ index 0000000000..944db7d848
 +  return `¥${String(value)}`
 +}
 +
-+function modelPanel(model: ModelPricing): React.ReactNode {
++function pricePair(values: Readonly<Record<PricePeriod, number>>, currentPeriod: PricePeriod): React.ReactNode {
++  const otherPeriod: PricePeriod = currentPeriod === 'idle' ? 'peak' : 'idle'
++  return (
++    <span className={css.priceValues}>
++      <strong className={css.currentPrice}>{price(values[currentPeriod])}</strong>
++      <span className={css.priceSeparator} aria-hidden="true">/</span>
++      <span className={css.otherPrice}>{price(values[otherPeriod])}</span>
++    </span>
++  )
++}
++
++function modelPanel(model: ModelPricing, currentPeriod: PricePeriod): React.ReactNode {
 +  return (
 +    <section className={css.model} key={model.id}>
 +      <div className={css.modelName}>{model.version}</div>
 +      <div className={css.priceGrid}>
 +        <span>输入 · 缓存命中</span>
-+        <strong>{price(model.inputCacheHit.idle)} / {price(model.inputCacheHit.peak)}</strong>
++        {pricePair(model.inputCacheHit, currentPeriod)}
 +        <span>输入 · 缓存未命中</span>
-+        <strong>{price(model.inputCacheMiss.idle)} / {price(model.inputCacheMiss.peak)}</strong>
++        {pricePair(model.inputCacheMiss, currentPeriod)}
 +        <span>输出</span>
-+        <strong>{price(model.output.idle)} / {price(model.output.peak)}</strong>
++        {pricePair(model.output, currentPeriod)}
 +      </div>
 +    </section>
 +  )
 +}
 +
-+function PricingPanel({ state, currentPeriod }: { state: { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; snapshot: PricingSnapshot }; currentPeriod: PricePeriod }): React.ReactNode {
++export function PricingPanel({ state, currentPeriod }: { state: { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; snapshot: PricingSnapshot }; currentPeriod: PricePeriod }): React.ReactNode {
 +  if (state.status === 'loading') return <div className={css.status}>正在读取官方价格…</div>
 +  if (state.status === 'error') {
 +    return (
@@ -629,8 +661,8 @@ index 0000000000..944db7d848
 +    <div className={css.panel}>
 +      <div className={css.title}>DeepSeek 今日模型价格</div>
 +      <div className={css.period}>当前：{PERIOD_LABEL[currentPeriod]} · 元 / 百万 tokens</div>
-+      {state.snapshot.models.map(modelPanel)}
-+      <div className={css.legend}>每行：空闲 / 高峰</div>
++      {state.snapshot.models.map(model => modelPanel(model, currentPeriod))}
++      <div className={css.legend}>每行：当前时段 / 非当前时段</div>
 +      <a className={css.source} href={state.snapshot.source} target="_blank" rel="noreferrer">查看官方定价页 ↗</a>
 +    </div>
 +  )
@@ -713,7 +745,7 @@ index 0000000000..944db7d848
 +}
 diff --git a/packages/client/ui-peak-pricing/src/client/contract.ts b/packages/client/ui-peak-pricing/src/client/contract.ts
 new file mode 100644
-index 0000000000..389b88306c
+index 0000000000000000000000000000000000000000..389b88306c7637a9fa18a9a01a245840e473fcca
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/client/contract.ts
 @@ -0,0 +1,11 @@
@@ -730,7 +762,7 @@ index 0000000000..389b88306c
 +export type PeakPricingProps = PropsRuntime<'conversation.input.right'> & InjectFace<PeakPricingInjected>
 diff --git a/packages/client/ui-peak-pricing/src/client/index.ts b/packages/client/ui-peak-pricing/src/client/index.ts
 new file mode 100644
-index 0000000000..547db1557a
+index 0000000000000000000000000000000000000000..547db1557a2f5f7dec28a74c40f29a5e4f8037f3
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/client/index.ts
 @@ -0,0 +1,55 @@
@@ -791,7 +823,7 @@ index 0000000000..547db1557a
 +}
 diff --git a/packages/client/ui-peak-pricing/src/css-modules.d.ts b/packages/client/ui-peak-pricing/src/css-modules.d.ts
 new file mode 100644
-index 0000000000..8811db1264
+index 0000000000000000000000000000000000000000..8811db126498ec8fac4acff5c3f137ffb839fec5
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/css-modules.d.ts
 @@ -0,0 +1,4 @@
@@ -801,7 +833,7 @@ index 0000000000..8811db1264
 +}
 diff --git a/packages/client/ui-peak-pricing/src/index.ts b/packages/client/ui-peak-pricing/src/index.ts
 new file mode 100644
-index 0000000000..9dc33fb233
+index 0000000000000000000000000000000000000000..9dc33fb233e5e3ad2f834563507b5ac3b28c1f3f
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/index.ts
 @@ -0,0 +1,70 @@
@@ -877,7 +909,7 @@ index 0000000000..9dc33fb233
 +}
 diff --git a/packages/client/ui-peak-pricing/src/invariant.ts b/packages/client/ui-peak-pricing/src/invariant.ts
 new file mode 100644
-index 0000000000..eb0c5e5317
+index 0000000000000000000000000000000000000000..eb0c5e5317a0ba1430188461dee4351cc0383869
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/invariant.ts
 @@ -0,0 +1,24 @@
@@ -907,7 +939,7 @@ index 0000000000..eb0c5e5317
 +/* jscpd:ignore-end */
 diff --git a/packages/client/ui-peak-pricing/src/pricing.ts b/packages/client/ui-peak-pricing/src/pricing.ts
 new file mode 100644
-index 0000000000..6715c268e0
+index 0000000000000000000000000000000000000000..6715c268e0109c23ccce95f17db215f469d5087e
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/src/pricing.ts
 @@ -0,0 +1,198 @@
@@ -1109,9 +1141,99 @@ index 0000000000..6715c268e0
 +    models,
 +  }
 +}
+diff --git a/packages/client/ui-peak-pricing/tests/peak-pricing-notice.client.spec.tsx b/packages/client/ui-peak-pricing/tests/peak-pricing-notice.client.spec.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..4d91083a4d6470139ddd3eb9c3e741c1bfa8312a
+--- /dev/null
++++ b/packages/client/ui-peak-pricing/tests/peak-pricing-notice.client.spec.tsx
+@@ -0,0 +1,84 @@
++// @vitest-environment jsdom
++
++import { cleanup, render } from '@testing-library/react'
++import { afterEach, describe, expect, it } from 'vitest'
++import type { PricingSnapshot } from '../src/pricing.ts'
++import { PricingPanel } from '../src/client/PeakPricingNotice.tsx'
++import css from '../src/client/PeakPricingNotice.module.css'
++
++const SNAPSHOT: PricingSnapshot = {
++  source: 'https://api-docs.deepseek.com/zh-cn/quick_start/pricing/',
++  date: '2026-08-29',
++  timezone: 'Asia/Shanghai',
++  fetchedAt: '2026-08-29T00:00:00.000Z',
++  currentPeriod: 'idle',
++  models: [
++    {
++      id: 'deepseek-v4-flash',
++      version: 'DeepSeek-V4-Flash-0731',
++      inputCacheHit: { idle: 0.05, peak: 0.1 },
++      inputCacheMiss: { idle: 1.5, peak: 3 },
++      output: { idle: 4.5, peak: 9 },
++    },
++    {
++      id: 'deepseek-v4-pro',
++      version: 'DeepSeek-V4-Pro-0813',
++      inputCacheHit: { idle: 0.15, peak: 0.3 },
++      inputCacheMiss: { idle: 4.5, peak: 9 },
++      output: { idle: 13.5, peak: 27 },
++    },
++    {
++      id: 'deepseek-v4-flash-vision-exp',
++      version: 'DeepSeek-V4-Flash-Vision-Exp',
++      inputCacheHit: { idle: 0.05, peak: 0.1 },
++      inputCacheMiss: { idle: 1.5, peak: 3 },
++      output: { idle: 4.5, peak: 9 },
++    },
++  ],
++}
++
++afterEach(cleanup)
++
++function renderedPairs(period: 'idle' | 'peak'): { current: string; other: string; separator: string }[] {
++  const view = render(<PricingPanel state={{ status: 'ready', snapshot: SNAPSHOT }} currentPeriod={period} />)
++  expect(view.getByText(`当前：${period === 'idle' ? '空闲时段' : '高峰时段'} · 元 / 百万 tokens`)).toBeTruthy()
++  expect(view.getByText('每行：当前时段 / 非当前时段')).toBeTruthy()
++  return [...view.container.querySelectorAll(`.${css.priceValues}`)].map(row => ({
++    current: row.querySelector(`.${css.currentPrice}`)?.textContent ?? '',
++    other: row.querySelector(`.${css.otherPrice}`)?.textContent ?? '',
++    separator: row.querySelector(`.${css.priceSeparator}`)?.textContent ?? '',
++  }))
++}
++
++describe('peak pricing panel', () => {
++  it('puts all current idle prices first and emphasizes them', () => {
++    const pairs = renderedPairs('idle')
++    expect(pairs).toEqual([
++      { current: '¥0.05', other: '¥0.1', separator: '/' },
++      { current: '¥1.5', other: '¥3', separator: '/' },
++      { current: '¥4.5', other: '¥9', separator: '/' },
++      { current: '¥0.15', other: '¥0.3', separator: '/' },
++      { current: '¥4.5', other: '¥9', separator: '/' },
++      { current: '¥13.5', other: '¥27', separator: '/' },
++      { current: '¥0.05', other: '¥0.1', separator: '/' },
++      { current: '¥1.5', other: '¥3', separator: '/' },
++      { current: '¥4.5', other: '¥9', separator: '/' },
++    ])
++    expect(document.querySelectorAll(`strong.${css.currentPrice}`)).toHaveLength(9)
++    expect(document.querySelectorAll(`span.${css.otherPrice}`)).toHaveLength(9)
++  })
++
++  it('puts all current peak prices first without changing model order', () => {
++    expect(renderedPairs('peak')).toEqual([
++      { current: '¥0.1', other: '¥0.05', separator: '/' },
++      { current: '¥3', other: '¥1.5', separator: '/' },
++      { current: '¥9', other: '¥4.5', separator: '/' },
++      { current: '¥0.3', other: '¥0.15', separator: '/' },
++      { current: '¥9', other: '¥4.5', separator: '/' },
++      { current: '¥27', other: '¥13.5', separator: '/' },
++      { current: '¥0.1', other: '¥0.05', separator: '/' },
++      { current: '¥3', other: '¥1.5', separator: '/' },
++      { current: '¥9', other: '¥4.5', separator: '/' },
++    ])
++  })
++})
 diff --git a/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts b/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts
 new file mode 100644
-index 0000000000..6cfa162c66
+index 0000000000000000000000000000000000000000..6cfa162c669e1013d7daff34d615a14fafbfedcd
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/tests/pricing.client.spec.ts
 @@ -0,0 +1,73 @@
@@ -1190,7 +1312,7 @@ index 0000000000..6cfa162c66
 +})
 diff --git a/packages/client/ui-peak-pricing/tsconfig.json b/packages/client/ui-peak-pricing/tsconfig.json
 new file mode 100644
-index 0000000000..2f76fdfb5d
+index 0000000000000000000000000000000000000000..2f76fdfb5d37e0f7d6c55df7655369a69d6589fa
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/tsconfig.json
 @@ -0,0 +1,30 @@
@@ -1226,7 +1348,7 @@ index 0000000000..2f76fdfb5d
 +}
 diff --git a/packages/client/ui-peak-pricing/tsdown.config.ts b/packages/client/ui-peak-pricing/tsdown.config.ts
 new file mode 100644
-index 0000000000..2bc04a72ba
+index 0000000000000000000000000000000000000000..2bc04a72ba19c236f2e3b2e851b995b23cbe93cf
 --- /dev/null
 +++ b/packages/client/ui-peak-pricing/tsdown.config.ts
 @@ -0,0 +1,3 @@
@@ -1234,7 +1356,7 @@ index 0000000000..2bc04a72ba
 +
 +export default clientBundle('@deepseek-ai/dsh-client-ui-peak-pricing', ['lib/types/index.js', 'lib/types/invariant.js'])
 diff --git a/packages/client/ui-primitives/README.i18n.yaml b/packages/client/ui-primitives/README.i18n.yaml
-index bea8889dce..e22137717c 100644
+index bea8889dced6b8872fdeead2e393ff068febca07..e22137717c2fb331afffbaed854165877d3047ba 100644
 --- a/packages/client/ui-primitives/README.i18n.yaml
 +++ b/packages/client/ui-primitives/README.i18n.yaml
 @@ -2,5 +2,5 @@
@@ -1246,7 +1368,7 @@ index bea8889dce..e22137717c 100644
 +README.md: 82cf484a37a239ed658f9965b4f88eff690ba511
 +README.zh.md: 926959df0b655cd64078fd155912b8858f02c7e7
 diff --git a/packages/client/ui-primitives/README.md b/packages/client/ui-primitives/README.md
-index f96e931472..82cf484a37 100644
+index f96e931472a0946bd023b97b034643f079a67e44..82cf484a37a239ed658f9965b4f88eff690ba511 100644
 --- a/packages/client/ui-primitives/README.md
 +++ b/packages/client/ui-primitives/README.md
 @@ -6,7 +6,7 @@ Pure React atoms (zero cordis): StateDot, DisclosureRow, ic_ds_* icons, Button/P
@@ -1259,7 +1381,7 @@ index f96e931472..82cf484a37 100644
  ## Toast
  
 diff --git a/packages/client/ui-primitives/README.zh.md b/packages/client/ui-primitives/README.zh.md
-index bf47fa2bca..926959df0b 100644
+index bf47fa2bca6f685fc52ca6ff786439a8d51230fc..926959df0b655cd64078fd155912b8858f02c7e7 100644
 --- a/packages/client/ui-primitives/README.zh.md
 +++ b/packages/client/ui-primitives/README.zh.md
 @@ -6,7 +6,7 @@
@@ -1273,7 +1395,7 @@ index bf47fa2bca..926959df0b 100644
  
 diff --git a/packages/client/ui-primitives/src/FloatingSurface.module.css b/packages/client/ui-primitives/src/FloatingSurface.module.css
 new file mode 100644
-index 0000000000..011612cc8d
+index 0000000000000000000000000000000000000000..011612cc8d5cd5e774c7515c443999659adf419e
 --- /dev/null
 +++ b/packages/client/ui-primitives/src/FloatingSurface.module.css
 @@ -0,0 +1,11 @@
@@ -1289,7 +1411,7 @@ index 0000000000..011612cc8d
 +  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 +}
 diff --git a/packages/client/ui-primitives/src/HoverCard.module.css b/packages/client/ui-primitives/src/HoverCard.module.css
-index 8d425ca85c..2daa458737 100644
+index 8d425ca85c3af19fb9ed02b9d8eb735da68f9e1e..2daa4587372dd484dafee96bbc6725d14405d1aa 100644
 --- a/packages/client/ui-primitives/src/HoverCard.module.css
 +++ b/packages/client/ui-primitives/src/HoverCard.module.css
 @@ -5,21 +5,16 @@
@@ -1320,7 +1442,7 @@ index 8d425ca85c..2daa458737 100644
  
  .copyable {
 diff --git a/packages/client/ui-primitives/src/HoverCard.tsx b/packages/client/ui-primitives/src/HoverCard.tsx
-index ea14afad1f..3c14cf8b0c 100644
+index ea14afad1f379d235c549b5dd215cf9d63722387..3c14cf8b0c023853de0320cad6fb511f287f38aa 100644
 --- a/packages/client/ui-primitives/src/HoverCard.tsx
 +++ b/packages/client/ui-primitives/src/HoverCard.tsx
 @@ -1,4 +1,4 @@
@@ -1508,7 +1630,7 @@ index ea14afad1f..3c14cf8b0c 100644
          clearTimer()
          cancelClose()
 diff --git a/packages/client/ui-primitives/src/Menu.module.css b/packages/client/ui-primitives/src/Menu.module.css
-index 7bc0c5aced..c9f9e3dd50 100644
+index 7bc0c5aced52781e296cb31fe34f5499777c8616..c9f9e3dd50ce5747fdde2b55bf88be7206c5035f 100644
 --- a/packages/client/ui-primitives/src/Menu.module.css
 +++ b/packages/client/ui-primitives/src/Menu.module.css
 @@ -8,22 +8,10 @@
@@ -1535,7 +1657,7 @@ index 7bc0c5aced..c9f9e3dd50 100644
  
  /* Primary card is 218 wide in the design across both hosts. */
 diff --git a/packages/client/ui-primitives/src/Menu.tsx b/packages/client/ui-primitives/src/Menu.tsx
-index 46c30b8afb..fa9a2d1118 100644
+index 46c30b8afb3f5adac11487dacfc6dd0f50f643f6..fa9a2d11184e5fece8398f24b371aaae8ef44e9a 100644
 --- a/packages/client/ui-primitives/src/Menu.tsx
 +++ b/packages/client/ui-primitives/src/Menu.tsx
 @@ -15,6 +15,7 @@ import clsx from 'clsx'
@@ -1565,7 +1687,7 @@ index 46c30b8afb..fa9a2d1118 100644
        role="menu"
        // React portals bubble synthetic events through the REACT tree: without
 diff --git a/packages/client/ui-primitives/tests/hover-card.client.spec.tsx b/packages/client/ui-primitives/tests/hover-card.client.spec.tsx
-index 53d5d2bcf7..ece6137467 100644
+index 53d5d2bcf7191e306ff6fbff0eec91e807e45f0a..ece613746757e2c47d49a662dd46ee9c6b70b07e 100644
 --- a/packages/client/ui-primitives/tests/hover-card.client.spec.tsx
 +++ b/packages/client/ui-primitives/tests/hover-card.client.spec.tsx
 @@ -20,6 +20,8 @@ function stubAnchorRect(anchor: HTMLElement, rect: { top: number; right: number
@@ -1624,7 +1746,7 @@ index 53d5d2bcf7..ece6137467 100644
      const { wrapper } = mount()
      fireEvent.pointerEnter(wrapper)
 diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
-index bcc517d651..a42521c244 100644
+index bcc517d651dd1e5a606656899f5ffe45a1a7a864..a42521c24480c5fefc2582a2b93c5c0067055364 100644
 --- a/pnpm-lock.yaml
 +++ b/pnpm-lock.yaml
 @@ -1324,6 +1324,9 @@ importers:
@@ -1672,7 +1794,7 @@ index bcc517d651..a42521c244 100644
      devDependencies:
        '@deepseek-ai/cordis':
 diff --git a/scripts/verify-package-readme-model-experience.ts b/scripts/verify-package-readme-model-experience.ts
-index d38b4743c5..f42a71e8d1 100644
+index d38b4743c52c6562831d6f79ceab942dab9e8e45..f42a71e8d198a273af58d9f9c7be27189a65af10 100644
 --- a/scripts/verify-package-readme-model-experience.ts
 +++ b/scripts/verify-package-readme-model-experience.ts
 @@ -62,6 +62,7 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
@@ -1685,7 +1807,7 @@ index d38b4743c5..f42a71e8d1 100644
    'packages/client/schema-form': { kind: 'none', reason: 'Browser-side form-rendering library; registers nothing model-facing.' },
 diff --git a/start-dsh.bat b/start-dsh.bat
 new file mode 100644
-index 0000000000..e03f168e01
+index 0000000000000000000000000000000000000000..e03f168e018758510a5945c05b21f912df437d8d
 --- /dev/null
 +++ b/start-dsh.bat
 @@ -0,0 +1,44 @@
@@ -1734,7 +1856,7 @@ index 0000000000..e03f168e01
 +
 +endlocal
 diff --git a/tsconfig.client.json b/tsconfig.client.json
-index e599f76f1b..e240cdef25 100644
+index e599f76f1b05a5b73b7d8f7775573982101ad9fc..e240cdef25fa1c3ddc867413b60a1194ffabb4f6 100644
 --- a/tsconfig.client.json
 +++ b/tsconfig.client.json
 @@ -81,6 +81,7 @@
